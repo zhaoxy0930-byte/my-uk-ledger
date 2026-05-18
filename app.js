@@ -875,8 +875,17 @@ async function signUpWithEmail() {
 
 async function signOutCloud() {
   if (!supabaseClient) return;
+  await saveCloudState();
   await supabaseClient.auth.signOut();
   currentUser = null;
+  clearTimeout(cloudSaveTimer);
+  state = { transactions: [], rules: defaultRules, categories: [], importLog: [] };
+  localStorage.removeItem(STORAGE_KEY);
+  pendingImport = null;
+  activeMacroFilter = null;
+  transactionPage = 1;
+  hydrateControls();
+  render();
   updateAuthUi();
   setCloudStatus(tr("signedOut"));
 }

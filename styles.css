@@ -1405,11 +1405,36 @@ th:nth-child(7) {
   .sidebar {
     position: static;
     height: auto;
-    margin: 14px;
+    margin: 12px;
+    padding: 14px;
+    gap: 14px;
+    border-radius: 24px;
+  }
+
+  .brand {
+    padding: 0;
+  }
+
+  .privacy-note {
+    display: none;
   }
 
   .nav {
-    grid-template-columns: repeat(3, 1fr);
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+  }
+
+  .nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .nav-item {
+    flex: 0 0 auto;
+    min-width: 112px;
+    justify-content: center;
   }
 
   .topbar,
@@ -1420,11 +1445,40 @@ th:nth-child(7) {
   }
 
   .main {
-    padding: 34px 22px 56px;
+    padding: 18px 16px 48px;
   }
 
   .topbar {
     display: grid;
+    gap: 18px;
+    margin-bottom: 24px;
+  }
+
+  .topbar-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+  }
+
+  .topbar-actions > *,
+  .topbar-actions .button,
+  .topbar-actions .icon-button,
+  .topbar-actions select {
+    width: 100%;
+  }
+
+  .select-label,
+  .period-nav {
+    grid-column: span 2;
+  }
+
+  .select-label {
+    justify-content: space-between;
+  }
+
+  .period-nav {
+    display: grid;
+    grid-template-columns: 44px 1fr 44px;
   }
 
   .table-meta {
@@ -1438,35 +1492,131 @@ th:nth-child(7) {
 
   .period-summary {
     display: grid;
+    gap: 12px;
+  }
+
+  .legend {
+    flex-wrap: wrap;
   }
 
   .period-breakdown {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .weekly-head,
-  .weekly-row,
   .macro-layout {
     grid-template-columns: 1fr;
+  }
+
+  .weekly-head,
+  .weekly-row {
+    grid-template-columns: 1fr;
+  }
+
+  .toolbar {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .toolbar input,
+  .toolbar select,
+  .date-filter,
+  .date-filter input {
+    width: 100%;
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .date-filter {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .date-filter span {
+    display: none;
+  }
+
+  .panel,
+  .metric,
+  .dropzone {
+    padding: 24px;
+  }
+
+  .chart-wrap {
+    padding: 8px;
+    overflow: hidden;
+  }
+
+  .chart-wrap canvas {
+    width: 100%;
   }
 }
 
 @media (max-width: 620px) {
+  body {
+    overflow-x: hidden;
+  }
+
   .main {
-    padding: 18px;
+    padding: 14px;
+  }
+
+  h1 {
+    font-size: 38px;
+  }
+
+  h2 {
+    font-size: 17px;
+  }
+
+  .brand-mark {
+    width: 36px;
+    height: 36px;
+    font-size: 20px;
+  }
+
+  .brand span {
+    display: none;
   }
 
   .metric-grid,
-  .period-breakdown,
-  .nav {
+  .period-breakdown {
     grid-template-columns: 1fr;
   }
 
   .metric strong {
-    font-size: 24px;
+    font-size: 30px;
   }
 
-  h1 {
-    font-size: 26px;
+  .panel-head {
+    align-items: flex-start;
+    display: grid;
+    gap: 8px;
+  }
+
+  .weekly-row {
+    padding: 12px;
+  }
+
+  .macro-layout canvas {
+    width: 190px;
+    height: 190px;
+  }
+
+  #macroCategoryBars .bar-top {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+
+  #macroCategoryBars .bar-top span {
+    text-align: left;
+  }
+
+  .auth-dialog {
+    padding: 26px;
+    border-radius: 24px;
+  }
+
+  .auth-actions {
+    display: grid;
   }
 }
