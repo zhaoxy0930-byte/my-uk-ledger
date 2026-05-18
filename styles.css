@@ -2336,3 +2336,213 @@ th:nth-child(7) {
     gap: 10px !important;
   }
 }
+
+@media (max-width: 760px) {
+  .topbar {
+    gap: 10px !important;
+  }
+
+  .topbar-actions {
+    display: grid !important;
+    grid-template-columns: auto auto 1fr auto !important;
+    gap: 8px !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    align-items: center !important;
+  }
+
+  .save-indicator,
+  #seedButton,
+  #resetButton {
+    display: none !important;
+  }
+
+  .cloud-button {
+    min-width: 82px !important;
+    justify-content: center !important;
+  }
+
+  .privacy-toggle {
+    width: 42px !important;
+  }
+
+  .language-select {
+    min-width: 76px !important;
+    justify-self: end !important;
+  }
+
+  .select-label {
+    grid-column: 1 / span 2 !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    justify-content: space-between !important;
+    background: #ffffff !important;
+    border: 0.5px solid var(--line) !important;
+    border-radius: 16px !important;
+    padding: 0 10px !important;
+  }
+
+  .select-label select {
+    border: 0 !important;
+    min-width: 86px !important;
+    padding-inline: 4px !important;
+  }
+
+  .period-nav {
+    grid-column: 1 / -1 !important;
+    display: grid !important;
+    grid-template-columns: 44px minmax(0, 1fr) 44px !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+
+  #currentPeriodButton {
+    min-width: 0 !important;
+    width: 100% !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .metric {
+    min-height: 108px !important;
+    padding: 16px !important;
+    gap: 7px !important;
+  }
+
+  .metric strong {
+    font-size: clamp(21px, 6.8vw, 30px) !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    letter-spacing: -0.045em !important;
+  }
+
+  .metric small {
+    max-width: 100% !important;
+    font-size: 11px !important;
+    line-height: 1.25 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .period-breakdown {
+    margin-top: 10px !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+
+  .period-breakdown button {
+    padding: 12px !important;
+    min-height: 0 !important;
+    border-radius: 16px !important;
+  }
+
+  .period-breakdown strong,
+  .period-breakdown small {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .period-breakdown strong {
+    font-size: 16px !important;
+  }
+
+  .weekly-breakdown {
+    margin-top: 10px !important;
+    gap: 6px !important;
+    padding-top: 2px !important;
+  }
+
+  .weekly-row {
+    grid-template-columns: minmax(74px, 0.8fr) minmax(0, 1.2fr) auto !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 10px 12px !important;
+    border-radius: 16px !important;
+  }
+
+  .weekly-row > span:nth-child(4),
+  .weekly-row > span:nth-child(5) {
+    display: none !important;
+  }
+
+  tr {
+    display: grid !important;
+    gap: 8px !important;
+    padding: 14px !important;
+  }
+
+  td {
+    grid-template-columns: 82px minmax(0, 1fr) !important;
+    align-items: start !important;
+    padding: 2px 0 !important;
+  }
+
+  td[data-label="Merchant / Description"],
+  td[data-label="商户 / 描述"] {
+    order: 1 !important;
+    grid-template-columns: 1fr !important;
+    padding-bottom: 12px !important;
+  }
+
+  td[data-label="Merchant / Description"]::before,
+  td[data-label="商户 / 描述"]::before {
+    display: none !important;
+  }
+
+  td[data-label="Amount"],
+  td[data-label="金额"] {
+    order: 2 !important;
+  }
+
+  td[data-label="Date"],
+  td[data-label="日期"] {
+    order: 3 !important;
+  }
+
+  td[data-label="Category"],
+  td[data-label="类目"] {
+    order: 4 !important;
+  }
+
+  td[data-label="Status"],
+  td[data-label="状态"] {
+    order: 5 !important;
+  }
+
+  td[data-label="Actions"],
+  td[data-label="操作"] {
+    order: 6 !important;
+  }
+
+  td[data-label="Bank"],
+  td[data-label="银行"] {
+    display: none !important;
+  }
+
+  .merchant-input {
+    font-size: 17px !important;
+    font-weight: 800 !important;
+    padding-left: 0 !important;
+  }
+
+  .description-input {
+    padding-left: 0 !important;
+  }
+
+  .amount-input {
+    font-size: 18px !important;
+    font-weight: 700 !important;
+    white-space: nowrap !important;
+  }
+
+  .row-actions {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    width: 100% !important;
+  }
+}

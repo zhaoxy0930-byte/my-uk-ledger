@@ -365,6 +365,8 @@ const copy = {
     signUp: "Sign up",
     signOut: "Sign out",
     cloudSync: "Cloud sync",
+    account: "Account",
+    signInShort: "Sign in",
     authTitle: "Sign in to Ledger UK",
     authCopy: "Save your ledger to Supabase so it can follow you across devices.",
     close: "Close",
@@ -553,6 +555,8 @@ const copy = {
     signUp: "注册",
     signOut: "退出",
     cloudSync: "云端同步",
+    account: "账户",
+    signInShort: "登录",
     authTitle: "登录 Ledger UK",
     authCopy: "把账本保存到 Supabase，这样换电脑也能继续使用。",
     close: "关闭",
@@ -821,7 +825,7 @@ function updateAuthUi() {
 
 function setCloudStatus(message, isError = false) {
   if (els.authStatus) {
-    els.authStatus.textContent = message;
+    els.authStatus.textContent = currentUser ? tr("account") : tr("signInShort");
     els.authStatus.classList.toggle("error", isError);
   }
   if (els.authMessage) {
