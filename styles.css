@@ -2202,3 +2202,137 @@ th:nth-child(7) {
     max-width: 100% !important;
   }
 }
+
+@media (max-width: 760px) {
+  .view {
+    gap: 14px;
+  }
+
+  .chart-wrap {
+    height: 210px !important;
+    min-height: 210px !important;
+    max-height: 210px !important;
+    overflow: hidden !important;
+    display: block !important;
+  }
+
+  .chart-wrap canvas {
+    display: block !important;
+    width: 100% !important;
+    height: 190px !important;
+    max-height: 190px !important;
+  }
+
+  .period-breakdown {
+    margin-top: 12px !important;
+  }
+
+  .period-breakdown button {
+    padding: 13px 14px !important;
+    min-height: 0 !important;
+    border-radius: 18px !important;
+  }
+
+  .period-breakdown strong {
+    font-size: 17px !important;
+  }
+
+  .weekly-breakdown {
+    margin-top: 12px !important;
+    gap: 8px !important;
+  }
+
+  .weekly-breakdown .weekly-row:nth-of-type(n+4) {
+    display: none !important;
+  }
+
+  .weekly-row {
+    border-radius: 18px !important;
+    background: #ffffff !important;
+  }
+
+  .weekly-bars {
+    width: 100% !important;
+  }
+
+  .weekly-bars i {
+    max-width: 100% !important;
+  }
+
+  .table-panel {
+    background: transparent !important;
+  }
+
+  tr {
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.04);
+  }
+
+  td {
+    grid-template-columns: 92px minmax(0, 1fr) !important;
+    align-items: start !important;
+  }
+
+  td[data-label="Merchant / Description"],
+  td[data-label="商户 / 描述"] {
+    grid-template-columns: 1fr !important;
+    padding-bottom: 12px !important;
+  }
+
+  td[data-label="Merchant / Description"]::before,
+  td[data-label="商户 / 描述"]::before {
+    display: none !important;
+  }
+
+  td[data-label="Merchant / Description"] .merchant-input,
+  td[data-label="商户 / 描述"] .merchant-input {
+    font-size: 17px !important;
+    font-weight: 800 !important;
+    padding-left: 0 !important;
+  }
+
+  td[data-label="Merchant / Description"] .description-input,
+  td[data-label="商户 / 描述"] .description-input {
+    padding-left: 0 !important;
+  }
+
+  td[data-label="Amount"],
+  td[data-label="金额"] {
+    align-items: center !important;
+  }
+
+  .amount-input {
+    font-size: 18px !important;
+    font-weight: 700 !important;
+  }
+
+  .row-actions {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  .row-actions button {
+    min-height: 40px !important;
+  }
+
+  .compact-row,
+  .rank-row {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    gap: 12px !important;
+    align-items: start !important;
+  }
+
+  .timeline-row {
+    display: grid !important;
+    grid-template-columns: 44px minmax(0, 1fr) !important;
+    gap: 10px !important;
+    align-items: stretch !important;
+  }
+
+  .timeline-body {
+    min-width: 0 !important;
+  }
+
+  .rule-row {
+    gap: 10px !important;
+  }
+}

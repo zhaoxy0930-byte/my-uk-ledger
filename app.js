@@ -99,6 +99,8 @@ document.addEventListener("DOMContentLoaded", () => {
   initCloudSync();
 });
 
+window.addEventListener("resize", debounce(() => render(), 160));
+
 function cacheElements() {
   [
     "pageTitle", "periodSelect", "prevPeriodButton", "currentPeriodButton", "nextPeriodButton", "privacyToggleButton", "languageSelect", "authOpenButton", "authModal", "authCloseButton", "authDialogEyebrow", "authDialogTitle", "authDialogCopy", "authForm", "authEmail", "authPassword", "signInButton", "signUpButton", "signOutButton", "authStatus", "authMessage", "seedButton", "resetButton", "saveIndicator", "incomeMetric", "expenseMetric",
@@ -959,6 +961,14 @@ async function withTimeout(request, milliseconds = 12000) {
   return result;
 }
 
+function debounce(fn, wait = 120) {
+  let timer;
+  return (...args) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn(...args), wait);
+  };
+}
+
 function mergeLedgerStates(localState, cloudState) {
   return {
     transactions: mergeById(localState.transactions, cloudState.transactions),
@@ -1045,6 +1055,7 @@ function setView(view) {
   };
   els.pageTitle.textContent = titles[view] || tr("pageTitles.dashboard");
   render();
+  requestAnimationFrame(() => render());
 }
 
 function updateCurrentPeriodButton() {
@@ -2070,6 +2081,10 @@ function renderWeeklyBreakdown(transactions) {
   });
 }
 
+function isMobileLayout() {
+  return window.matchMedia?.("(max-width: 760px)").matches || window.innerWidth <= 760;
+}
+
 function openWeekTransactions(weekLabel) {
   const [yearText, weekText] = String(weekLabel).split("-W");
   const range = weekRange(Number(yearText), Number(weekText));
@@ -2949,12 +2964,20 @@ function detectRecurring(transactions = state.transactions) {
 }
 
 function drawChart(canvas, points, options = {}) {
+  if (!canvas) return;
+  const visible = canvas.offsetParent !== null || canvas.getClientRects().length > 0;
+  if (!visible) return;
   const ctx = canvas.getContext("2d");
-  const width = canvas.clientWidth || canvas.parentElement.clientWidth;
-  const height = Number(canvas.getAttribute("height"));
+  const rect = canvas.getBoundingClientRect();
+  const parentRect = canvas.parentElement?.getBoundingClientRect();
+  const fallbackWidth = Math.min(window.innerWidth - 48, 720);
+  const width = Math.max(260, Math.round(rect.width || parentRect?.width || fallbackWidth));
+  const height = isMobileLayout() ? 190 : Number(canvas.getAttribute("height"));
   const ratio = window.devicePixelRatio || 1;
   canvas.width = width * ratio;
   canvas.height = height * ratio;
+  canvas.style.width = "100%";
+  canvas.style.height = `${height}px`;
   ctx.scale(ratio, ratio);
   ctx.clearRect(0, 0, width, height);
   ctx.font = "12px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
