@@ -239,6 +239,7 @@
               <tbody id="transactionTable"></tbody>
             </table>
           </section>
+          <div id="mobileTransactionList" class="mobile-transaction-list"></div>
         </section>
 
         <section class="view" id="analyticsView">
@@ -380,6 +381,31 @@
           </div>
           <span id="authMessage" class="auth-message">Cloud off</span>
         </form>
+      </div>
+    </div>
+
+    <div class="sheet-backdrop hidden" id="transactionSheet" aria-hidden="true">
+      <div class="transaction-sheet" role="dialog" aria-modal="true" aria-labelledby="sheetMerchant">
+        <button class="icon-button modal-close" id="sheetCloseButton" type="button" title="Close">×</button>
+        <div class="sheet-head">
+          <div class="category-orb" id="sheetOrb"></div>
+          <div>
+            <h2 id="sheetMerchant">Transaction</h2>
+            <p id="sheetMeta" class="compact-meta"></p>
+          </div>
+        </div>
+        <div class="sheet-grid">
+          <label><span>Date</span><input id="sheetDate" type="date" /></label>
+          <label><span>Amount</span><input id="sheetAmount" type="number" step="0.01" /></label>
+          <label><span>Merchant</span><input id="sheetMerchantInput" /></label>
+          <label><span>Description</span><input id="sheetDescription" /></label>
+          <label><span>Category</span><select id="sheetCategory"></select></label>
+        </div>
+        <div class="sheet-actions">
+          <button class="button ghost" id="sheetRefundButton" type="button">Refund</button>
+          <button class="button danger" id="sheetDeleteButton" type="button">Delete</button>
+          <button class="button primary" id="sheetSaveButton" type="button">Save</button>
+        </div>
       </div>
     </div>
 
