@@ -2449,17 +2449,17 @@ function importReviewRow(item) {
   const dateValue = parseDate(item.date) || item.date;
   return `
     <tr class="${item.duplicate ? "duplicate-row" : ""}">
-      <td><input type="checkbox" data-pending-select="${item.pendingId}" ${item.selected && !item.duplicate ? "checked" : ""} ${item.duplicate ? "disabled" : ""} /></td>
-      <td><input class="table-input date-input" type="date" data-pending-field="date" data-pending-id="${item.pendingId}" value="${escapeHtml(dateValue)}" /></td>
-      <td>
+      <td data-label="${tr("importColumn")}"><input type="checkbox" data-pending-select="${item.pendingId}" ${item.selected && !item.duplicate ? "checked" : ""} ${item.duplicate ? "disabled" : ""} /></td>
+      <td data-label="${tr("tableHeads")[0]}"><input class="table-input date-input" type="date" data-pending-field="date" data-pending-id="${item.pendingId}" value="${escapeHtml(dateValue)}" /></td>
+      <td data-label="${tr("tableHeads")[1]}">
         <input class="table-input merchant-input" data-pending-field="merchant" data-pending-id="${item.pendingId}" value="${escapeHtml(item.merchant)}" />
         <input class="table-input description-input" data-pending-field="description" data-pending-id="${item.pendingId}" value="${escapeHtml(item.description)}" />
       </td>
-      <td>${escapeHtml(item.bank || "Bank Account")}</td>
-      <td>${pendingCategorySelect(item.pendingId, item.category)}</td>
-      <td><input class="table-input amount-input ${item.amount >= 0 ? "amount-income" : "amount-expense"}" type="number" step="0.01" data-pending-field="amount" data-pending-id="${item.pendingId}" value="${Number(item.amount || 0).toFixed(2)}" /></td>
-      <td><span class="status ${item.duplicate ? "review" : "ok"}">${item.duplicate ? item.duplicateReason : tr("ready")}</span></td>
-      <td><button type="button" data-pending-remove="${item.pendingId}">${tr("delete")}</button></td>
+      <td data-label="${tr("tableHeads")[2]}">${escapeHtml(item.bank || "Bank Account")}</td>
+      <td data-label="${tr("tableHeads")[3]}">${pendingCategorySelect(item.pendingId, item.category)}</td>
+      <td data-label="${tr("tableHeads")[4]}"><input class="table-input amount-input ${item.amount >= 0 ? "amount-income" : "amount-expense"}" type="number" step="0.01" data-pending-field="amount" data-pending-id="${item.pendingId}" value="${Number(item.amount || 0).toFixed(2)}" /></td>
+      <td data-label="${tr("tableHeads")[5]}"><span class="status ${item.duplicate ? "review" : "ok"}">${item.duplicate ? item.duplicateReason : tr("ready")}</span></td>
+      <td data-label="${tr("tableHeads")[6]}"><button type="button" data-pending-remove="${item.pendingId}">${tr("delete")}</button></td>
     </tr>
   `;
 }
@@ -2680,16 +2680,16 @@ function transactionRow(item) {
   const dateValue = parseDate(item.date) || item.date;
   return `
     <tr>
-      <td><input class="table-input date-input" type="date" data-id="${item.id}" data-field="date" value="${escapeHtml(dateValue)}" /></td>
-      <td>
+      <td data-label="${tr("tableHeads")[0]}"><input class="table-input date-input" type="date" data-id="${item.id}" data-field="date" value="${escapeHtml(dateValue)}" /></td>
+      <td data-label="${tr("tableHeads")[1]}">
         <input class="table-input merchant-input" data-id="${item.id}" data-field="merchant" value="${escapeHtml(item.merchant)}" />
         <input class="table-input description-input" data-id="${item.id}" data-field="description" value="${escapeHtml(item.description)}" />
       </td>
-      <td>${escapeHtml(item.bank)}</td>
-      <td>${categorySelect(item.id, item.category)}</td>
-      <td><input class="table-input amount-input ${item.amount >= 0 ? "amount-income" : "amount-expense"}" type="number" step="0.01" data-id="${item.id}" data-field="amount" value="${item.amount.toFixed(2)}" /></td>
-      <td><span class="status ${item.confidence < 0.6 ? "review" : "ok"}">${item.confidence < 0.6 ? tr("review") : tr("categorised")}</span></td>
-      <td>
+      <td data-label="${tr("tableHeads")[2]}">${escapeHtml(item.bank)}</td>
+      <td data-label="${tr("tableHeads")[3]}">${categorySelect(item.id, item.category)}</td>
+      <td data-label="${tr("tableHeads")[4]}"><input class="table-input amount-input ${item.amount >= 0 ? "amount-income" : "amount-expense"}" type="number" step="0.01" data-id="${item.id}" data-field="amount" value="${item.amount.toFixed(2)}" /></td>
+      <td data-label="${tr("tableHeads")[5]}"><span class="status ${item.confidence < 0.6 ? "review" : "ok"}">${item.confidence < 0.6 ? tr("review") : tr("categorised")}</span></td>
+      <td data-label="${tr("tableHeads")[6]}">
         <div class="row-actions">
           ${item.confidence < 0.6 ? `<button type="button" data-action="confirm" data-id="${item.id}" title="${tr("confirmTransaction")}">${tr("confirm")}</button>` : ""}
           <button type="button" data-action="refund" data-id="${item.id}" title="${tr("markAsRefund")}">${tr("refund")}</button>
