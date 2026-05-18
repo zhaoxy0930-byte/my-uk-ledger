@@ -83,6 +83,8 @@ let pendingImport = null;
 let activeMacroFilter = null;
 let privacyMode = false;
 let language = localStorage.getItem("ledger-uk-language") || "en";
+let rulesPage = 1;
+const RULES_PER_PAGE = 20;
 let supabaseClient = null;
 let currentUser = null;
 let cloudSaveTimer = null;
@@ -2084,7 +2086,7 @@ function renderCashflowChart(period, range) {
   const windowRange = getChartWindowRange(period, range);
   const points = fillPeriodPoints(transactionsInRange(reportingTransactions(state.transactions), windowRange), grain, windowRange);
   drawChart(els.cashflowChart, points, { mode: "cashflow" });
-  els.trendLabel.textContent = `${formatRange(windowRange)} · ${tr("by")} ${periodName(grain)}`;
+  els.trendLabel.textContent = `${formatRange(windowRange)} · ${tr("by")} ${displayPeriodName(grain)}`;
 }
 
 function renderCategoryBars(transactions) {
@@ -2103,8 +2105,8 @@ function renderPeriodBreakdown(current, previous, period) {
   const previousExpense = Math.abs(sum(previous.filter((item) => item.amount < 0), "amount"));
   const topMerchant = groupTotals(current.filter((item) => item.amount < 0), (item) => item.merchant, true)[0];
   els.periodBreakdown.innerHTML = `
-    <button type="button" data-dashboard-drilldown="income"><span>${tr("periodIncome")(periodName(period))}</span><strong>${money(currentIncome)}</strong><small>${deltaText(currentIncome, previousIncome)}</small></button>
-    <button type="button" data-dashboard-drilldown="expense"><span>${tr("periodExpense")(periodName(period))}</span><strong>${money(currentExpense)}</strong><small>${deltaText(currentExpense, previousExpense)}</small></button>
+    <button type="button" data-dashboard-drilldown="income"><span>${tr("periodIncome")(displayPeriodName(period))}</span><strong>${money(currentIncome)}</strong><small>${deltaText(currentIncome, previousIncome)}</small></button>
+    <button type="button" data-dashboard-drilldown="expense"><span>${tr("periodExpense")(displayPeriodName(period))}</span><strong>${money(currentExpense)}</strong><small>${deltaText(currentExpense, previousExpense)}</small></button>
     <button type="button" data-dashboard-drilldown="net"><span>${tr("transactionCount")}</span><strong>${current.length}</strong><small>${tr("previousItems")(previous.length)}</small></button>
     <button type="button" data-dashboard-drilldown="merchant" data-merchant="${escapeHtml(topMerchant?.label || "")}"><span>${tr("topMerchant")}</span><strong>${escapeHtml(topMerchant?.label || tr("none"))}</strong><small>${topMerchant ? money(topMerchant.total) : tr("noSpending")}</small></button>
   `;
@@ -2120,24 +2122,22 @@ function renderTimelineBreakdown(transactions, period) {
   const points = groupByPeriod(transactions, grain);
   const max = Math.max(...points.map((item) => Math.max(item.income, item.expense)), 0);
   els.weeklyBreakdown.innerHTML = points.length ? `
-    <div class="weekly-head"><strong>${periodName(grain)} breakdown</strong><span>${tr("weeklyLegend")}</span></div>
+    <div class="weekly-head"><strong>${displayPeriodName(grain)} breakdown</strong><span>${tr("weeklyLegend")}</span></div>
     ${points.map((point) => {
       const count = transactions.filter((item) => periodKey(parseLocalDate(item.date), grain) === point.label).length;
       const incomePercent = max ? Math.max(3, (point.income / max) * 100) : 0;
       const expensePercent = max ? Math.max(3, (point.expense / max) * 100) : 0;
       return `
         <button type="button" class="weekly-row" data-breakdown-label="${escapeHtml(point.label)}" data-breakdown-grain="${grain}">
-          <span><strong>${escapeHtml(point.label)}</strong><small>${tr("items")(count)}</small></span>
+          <span><strong>${escapeHtml(shortPeriodLabel(point.label, grain))}</strong><small>${tr("items")(count)}</small></span>
           <span class="weekly-bars">
-            <i class="weekly-income" style="width:${incomePercent}%"></i>
-            <i class="weekly-expense" style="width:${expensePercent}%"></i>
+            <i class="weekly-income" style="width:${incomePercent}%"><b>In ${money(point.income)}</b></i>
+            <i class="weekly-expense" style="width:${expensePercent}%"><b>Out ${money(point.expense)}</b></i>
           </span>
-          <span>${money(point.income)}</span>
-          <span>${money(point.expense)}</span>
           <span class="${point.net >= 0 ? "amount-income" : "amount-expense"}">${money(point.net)}</span>
         </button>
       `;
-    }).slice(0, isMobileLayout() ? 6 : points.length).join("")}
+    }).join("")}
   ` : "";
   els.weeklyBreakdown.querySelectorAll("[data-breakdown-label]").forEach((button) => {
     button.addEventListener("click", () => openPeriodTransactions(button.dataset.breakdownLabel, button.dataset.breakdownGrain));
@@ -2435,7 +2435,7 @@ function renderAnalytics() {
   drawChart(els.analysisChart, grouped, { mode: "cashflow" });
   const names = tr("analysisNames");
   els.analysisTitle.textContent = names[analysisGrain];
-  els.analysisRange.textContent = `${formatRange(range)} · ${tr("pointCount")(grouped.length, periodName(analysisGrain))}`;
+  els.analysisRange.textContent = `${formatRange(range)} · ${tr("pointCount")(grouped.length, displayPeriodName(analysisGrain))}`;
 
   const income = sum(scoped.filter((item) => item.amount > 0), "amount");
   const expense = Math.abs(sum(scoped.filter((item) => item.amount < 0), "amount"));
@@ -2450,8 +2450,8 @@ function renderAnalytics() {
   els.analysisAverageMetric.textContent = money(average);
   els.analysisIncomeDelta.textContent = deltaText(income, previousIncome);
   els.analysisExpenseDelta.textContent = deltaText(expense, previousExpense);
-  els.analysisPeakLabel.textContent = peak?.label ? tr("peakSpend")(periodName(analysisGrain), peak.label) : tr("waiting");
-  els.analysisAverageLabel.textContent = `${formatRange(range)} · ${tr("averageBy")(periodName(analysisGrain))}`;
+  els.analysisPeakLabel.textContent = peak?.label ? tr("peakSpend")(displayPeriodName(analysisGrain), peak.label) : tr("waiting");
+  els.analysisAverageLabel.textContent = `${formatRange(range)} · ${tr("averageBy")(displayPeriodName(analysisGrain))}`;
 
   const expenses = scoped.filter((item) => item.amount < 0);
   const merchants = groupTotals(expenses, (item) => item.merchant, true).slice(0, 8);
@@ -2478,14 +2478,31 @@ function renderRecurring() {
 }
 
 function renderRules() {
-  els.ruleCount.textContent = tr("rulesCount")(state.rules.length);
-  els.rulesList.innerHTML = state.rules.map((rule) => `
+  const totalPages = Math.max(1, Math.ceil(state.rules.length / RULES_PER_PAGE));
+  rulesPage = Math.min(Math.max(1, rulesPage), totalPages);
+  const start = (rulesPage - 1) * RULES_PER_PAGE;
+  const visibleRules = state.rules.slice(start, start + RULES_PER_PAGE);
+  els.ruleCount.textContent = `${tr("rulesCount")(state.rules.length)} · ${rulesPage}/${totalPages}`;
+  els.rulesList.innerHTML = `
+    <div class="rule-pager">
+      <button class="button ghost compact" type="button" data-rule-page="prev" ${rulesPage <= 1 ? "disabled" : ""}>${tr("previous")}</button>
+      <span>${start + 1}-${Math.min(start + RULES_PER_PAGE, state.rules.length)} / ${state.rules.length}</span>
+      <button class="button ghost compact" type="button" data-rule-page="next" ${rulesPage >= totalPages ? "disabled" : ""}>${tr("next")}</button>
+    </div>
+    ${visibleRules.map((rule) => `
     <div class="rule-row">
       <input value="${escapeHtml(rule.keyword)}" data-rule-keyword="${rule.id}" aria-label="Rule keyword" />
       ${ruleCategorySelect(rule.id, rule.category)}
       <button class="tile-delete" type="button" data-rule="${rule.id}" aria-label="${tr("delete")}">×</button>
     </div>
-  `).join("");
+  `).join("")}
+  `;
+  els.rulesList.querySelectorAll("[data-rule-page]").forEach((button) => {
+    button.addEventListener("click", () => {
+      rulesPage += button.dataset.rulePage === "next" ? 1 : -1;
+      renderRules();
+    });
+  });
   els.rulesList.querySelectorAll("input[data-rule-keyword]").forEach((input) => {
     input.addEventListener("change", () => updateRuleKeyword(input.dataset.ruleKeyword, input.value));
   });
@@ -3096,6 +3113,19 @@ function periodName(period) {
   return language === "zh"
     ? ({ day: "日", week: "周", month: "月", year: "年" })[period] || "周期"
     : ({ day: "day", week: "week", month: "month", year: "year" })[period] || "period";
+}
+
+function displayPeriodName(period) {
+  const name = periodName(period);
+  return language === "zh" ? name : name.charAt(0).toUpperCase() + name.slice(1);
+}
+
+function shortPeriodLabel(label, grain) {
+  const value = String(label || "");
+  if (grain === "week") return value.replace(/^\d{4}-W/, "W");
+  if (grain === "month") return value.replace(/^(\d{4})-(\d{2})$/, "$1/$2");
+  if (grain === "day") return value.slice(5);
+  return value;
 }
 
 function groupByPeriod(transactions, grain) {

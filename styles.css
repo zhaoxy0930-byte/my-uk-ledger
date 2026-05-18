@@ -3858,6 +3858,16 @@ th:nth-child(7) {
   }
 }
 
+.rule-pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
 /* Final mobile fixes: these rules intentionally sit last. */
 @media (max-width: 760px) {
   .sidebar {
@@ -3964,11 +3974,16 @@ th:nth-child(7) {
   .panel-head span,
   #trendLabel,
   #analysisRange {
-    max-width: 42% !important;
+    max-width: 50% !important;
     text-align: right !important;
-    font-size: 11px !important;
+    font-size: 10px !important;
     white-space: normal !important;
     line-height: 1.25 !important;
+  }
+
+  #trendLabel,
+  #analysisRange {
+    max-width: 48% !important;
   }
 
   .period-breakdown {
@@ -3993,19 +4008,63 @@ th:nth-child(7) {
   }
 
   .weekly-row {
-    grid-template-columns: 82px minmax(0, 1fr) auto !important;
+    grid-template-columns: 50px minmax(0, 1fr) auto !important;
     padding: 10px 12px !important;
-    min-height: 54px !important;
+    min-height: 62px !important;
+    gap: 10px !important;
+  }
+
+  .weekly-row > span:first-child strong {
+    white-space: nowrap !important;
+    font-size: 14px !important;
+  }
+
+  .weekly-row > span:first-child small {
+    font-size: 10px !important;
   }
 
   .weekly-row > span:nth-child(3) {
-    display: none !important;
-  }
-
-  .weekly-row > span:nth-child(4) {
     display: block !important;
+    min-width: 76px !important;
+    text-align: right !important;
     font-size: 13px !important;
     white-space: nowrap !important;
+  }
+
+  .weekly-bars {
+    height: auto !important;
+    display: grid !important;
+    gap: 5px !important;
+  }
+
+  .weekly-bars i {
+    position: relative !important;
+    min-width: 8px !important;
+    height: 16px !important;
+    border-radius: 999px !important;
+    overflow: visible !important;
+  }
+
+  .weekly-bars i b {
+    position: absolute !important;
+    left: 8px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    display: block !important;
+    font-size: 9px !important;
+    font-style: normal !important;
+    font-weight: 800 !important;
+    color: #111827 !important;
+    white-space: nowrap !important;
+    pointer-events: none !important;
+  }
+
+  .weekly-income {
+    background: linear-gradient(90deg, #14804a, #5fd18a) !important;
+  }
+
+  .weekly-expense {
+    background: linear-gradient(90deg, #f97316, #fdba74) !important;
   }
 
   .mobile-transactions-head {
@@ -4039,11 +4098,20 @@ th:nth-child(7) {
   }
 
   .mobile-sheet-head {
-    position: sticky !important;
-    top: -14px !important;
+    position: static !important;
     z-index: 1 !important;
-    padding: 8px 0 10px !important;
+    padding: 2px 0 10px !important;
     background: rgba(255, 255, 255, 0.96) !important;
+  }
+
+  #transactionsView .toolbar {
+    max-height: 76dvh !important;
+    transform: translateY(110%) !important;
+    overscroll-behavior: contain !important;
+  }
+
+  #transactionsView .toolbar.open {
+    transform: translateY(0) !important;
   }
 
   .bank-grid {
@@ -4067,5 +4135,25 @@ th:nth-child(7) {
   .analysis-controls .chip {
     min-width: 0 !important;
     padding: 10px 6px !important;
+  }
+
+  .analysis-metrics .metric small {
+    white-space: normal !important;
+    line-height: 1.22 !important;
+    font-size: 10px !important;
+  }
+
+  .rules-layout .panel:nth-child(2) {
+    order: -1 !important;
+  }
+
+  .rule-pager {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 2 !important;
+    padding: 8px !important;
+    border-radius: 16px !important;
+    background: rgba(255, 255, 255, 0.94) !important;
+    backdrop-filter: blur(12px) !important;
   }
 }
