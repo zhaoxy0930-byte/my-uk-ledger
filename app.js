@@ -88,6 +88,8 @@ let currentUser = null;
 let cloudSaveTimer = null;
 let applyingCloudState = false;
 let sheetTransactionId = null;
+let transactionReturnView = null;
+let lastScrollY = 0;
 const chartState = new WeakMap();
 
 const els = {};
@@ -101,6 +103,12 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 window.addEventListener("resize", debounce(() => render(), 160));
+window.addEventListener("scroll", () => {
+  if (!isMobileLayout()) return;
+  const y = window.scrollY || 0;
+  document.body.classList.toggle("mobile-nav-hidden", y > lastScrollY && y > 120);
+  lastScrollY = y;
+}, { passive: true });
 
 function cacheElements() {
   [
@@ -111,7 +119,7 @@ function cacheElements() {
     "analysisAverageMetric", "analysisIncomeDelta", "analysisExpenseDelta", "analysisPeakLabel", "analysisAverageLabel",
     "categoryBars", "categoryTotal", "insights", "recentTransactions", "viewTopExpensesButton",
     "dropzone", "fileInput", "chooseFileButton", "importSummary", "importPreview",
-    "transactionFilterButton", "transactionFilterCloseButton", "transactionFilterBackdrop", "searchInput", "categoryFilter", "typeFilter", "transactionSortSelect", "transactionStartDate", "transactionEndDate",
+    "mobileTransactionsBackButton", "transactionFilterButton", "transactionFilterCloseButton", "transactionFilterBackdrop", "searchInput", "categoryFilter", "typeFilter", "transactionSortSelect", "transactionStartDate", "transactionEndDate",
     "usePeriodDateFilterButton", "clearDateFilterButton", "findDuplicatesButton", "pageSizeSelect", "transactionCountLabel",
     "prevPageButton", "nextPageButton", "pageLabel", "transactionTable", "mobileTransactionList", "transactionSheet", "sheetCloseButton", "sheetMerchant", "sheetMeta", "sheetOrb", "sheetDate", "sheetAmount", "sheetMerchantInput", "sheetDescription", "sheetCategory", "sheetRefundButton", "sheetDeleteButton", "sheetSaveButton", "merchantRanking",
     "budgetPressure", "macroPieChart", "macroCategoryBars", "macroCategoryTotal", "analysisTitle", "analysisRange", "incomeRecurring", "expenseRecurring",
@@ -142,7 +150,10 @@ function setLanguage(nextLanguage) {
 
 function bindEvents() {
   document.querySelectorAll(".nav-item").forEach((button) => {
-    button.addEventListener("click", () => setView(button.dataset.view));
+    button.addEventListener("click", () => {
+      if (button.dataset.view === "transactions") transactionReturnView = null;
+      setView(button.dataset.view);
+    });
   });
 
   document.querySelectorAll("[data-jump]").forEach((button) => {
@@ -238,6 +249,7 @@ function bindEvents() {
   if (els.transactionFilterButton) els.transactionFilterButton.addEventListener("click", () => openTransactionFilters());
   if (els.transactionFilterCloseButton) els.transactionFilterCloseButton.addEventListener("click", () => closeTransactionFilters());
   if (els.transactionFilterBackdrop) els.transactionFilterBackdrop.addEventListener("click", () => closeTransactionFilters());
+  if (els.mobileTransactionsBackButton) els.mobileTransactionsBackButton.addEventListener("click", () => returnFromTransactionDrilldown());
   els.searchInput.addEventListener("input", () => clearMacroAndRenderTransactions());
   els.categoryFilter.addEventListener("change", () => clearMacroAndRenderTransactions());
   els.typeFilter.addEventListener("change", () => clearMacroAndRenderTransactions());
@@ -260,9 +272,12 @@ function bindEvents() {
   document.querySelectorAll("[data-grain]").forEach((button) => {
     button.addEventListener("click", () => {
       analysisGrain = button.dataset.grain;
+      if (els.periodSelect) els.periodSelect.value = analysisGrain;
+      if (els.mobilePeriodSelect) els.mobilePeriodSelect.value = analysisGrain;
       document.querySelectorAll("[data-grain]").forEach((item) => item.classList.remove("active"));
       button.classList.add("active");
-      renderAnalytics();
+      updateCurrentPeriodButton();
+      render();
     });
   });
 
@@ -1084,6 +1099,8 @@ function mergeDefaultRules(rules) {
 
 function setView(view) {
   currentView = view;
+  closeTransactionFilters();
+  if (view !== "transactions") transactionReturnView = null;
   document.querySelectorAll(".nav-item").forEach((item) => {
     item.classList.toggle("active", item.dataset.view === view);
   });
@@ -2094,35 +2111,36 @@ function renderPeriodBreakdown(current, previous, period) {
   els.periodBreakdown.querySelectorAll("[data-dashboard-drilldown]").forEach((button) => {
     button.addEventListener("click", () => openDashboardTransactions(button.dataset.dashboardDrilldown, button.dataset.merchant || ""));
   });
-  renderWeeklyBreakdown(current);
+  renderTimelineBreakdown(current, period);
 }
 
-function renderWeeklyBreakdown(transactions) {
+function renderTimelineBreakdown(transactions, period) {
   if (!els.weeklyBreakdown) return;
-  const weeks = groupByPeriod(transactions, "week");
-  const max = Math.max(...weeks.map((item) => Math.max(item.income, item.expense)), 0);
-  els.weeklyBreakdown.innerHTML = weeks.length ? `
-    <div class="weekly-head"><strong>${tr("weeklyBreakdown")}</strong><span>${tr("weeklyLegend")}</span></div>
-    ${weeks.map((week) => {
-      const count = transactions.filter((item) => weekKey(parseLocalDate(item.date)) === week.label).length;
-      const incomePercent = max ? Math.max(3, (week.income / max) * 100) : 0;
-      const expensePercent = max ? Math.max(3, (week.expense / max) * 100) : 0;
+  const grain = period === "year" ? "month" : period === "month" ? "week" : "day";
+  const points = groupByPeriod(transactions, grain);
+  const max = Math.max(...points.map((item) => Math.max(item.income, item.expense)), 0);
+  els.weeklyBreakdown.innerHTML = points.length ? `
+    <div class="weekly-head"><strong>${periodName(grain)} breakdown</strong><span>${tr("weeklyLegend")}</span></div>
+    ${points.map((point) => {
+      const count = transactions.filter((item) => periodKey(parseLocalDate(item.date), grain) === point.label).length;
+      const incomePercent = max ? Math.max(3, (point.income / max) * 100) : 0;
+      const expensePercent = max ? Math.max(3, (point.expense / max) * 100) : 0;
       return `
-        <button type="button" class="weekly-row" data-week-label="${escapeHtml(week.label)}">
-          <span><strong>${escapeHtml(week.label)}</strong><small>${tr("items")(count)}</small></span>
+        <button type="button" class="weekly-row" data-breakdown-label="${escapeHtml(point.label)}" data-breakdown-grain="${grain}">
+          <span><strong>${escapeHtml(point.label)}</strong><small>${tr("items")(count)}</small></span>
           <span class="weekly-bars">
             <i class="weekly-income" style="width:${incomePercent}%"></i>
             <i class="weekly-expense" style="width:${expensePercent}%"></i>
           </span>
-          <span>${money(week.income)}</span>
-          <span>${money(week.expense)}</span>
-          <span class="${week.net >= 0 ? "amount-income" : "amount-expense"}">${money(week.net)}</span>
+          <span>${money(point.income)}</span>
+          <span>${money(point.expense)}</span>
+          <span class="${point.net >= 0 ? "amount-income" : "amount-expense"}">${money(point.net)}</span>
         </button>
       `;
-    }).join("")}
+    }).slice(0, isMobileLayout() ? 6 : points.length).join("")}
   ` : "";
-  els.weeklyBreakdown.querySelectorAll("[data-week-label]").forEach((button) => {
-    button.addEventListener("click", () => openWeekTransactions(button.dataset.weekLabel));
+  els.weeklyBreakdown.querySelectorAll("[data-breakdown-label]").forEach((button) => {
+    button.addEventListener("click", () => openPeriodTransactions(button.dataset.breakdownLabel, button.dataset.breakdownGrain));
   });
 }
 
@@ -2130,9 +2148,9 @@ function isMobileLayout() {
   return window.matchMedia?.("(max-width: 760px)").matches || window.innerWidth <= 760;
 }
 
-function openWeekTransactions(weekLabel) {
-  const [yearText, weekText] = String(weekLabel).split("-W");
-  const range = weekRange(Number(yearText), Number(weekText));
+function openPeriodTransactions(label, grain) {
+  const range = rangeFromPeriodLabel(label, grain);
+  if (!range) return;
   activeMacroFilter = null;
   els.searchInput.value = "";
   els.categoryFilter.value = "all";
@@ -2140,7 +2158,26 @@ function openWeekTransactions(weekLabel) {
   els.transactionStartDate.value = toDateInputValue(range.start);
   els.transactionEndDate.value = toDateInputValue(range.end);
   transactionPage = 1;
+  transactionReturnView = "dashboard";
   setView("transactions");
+}
+
+function rangeFromPeriodLabel(label, grain) {
+  if (grain === "week") {
+    const [yearText, weekText] = String(label).split("-W");
+    return weekRange(Number(yearText), Number(weekText));
+  }
+  if (grain === "month") {
+    const match = String(label).match(/^(\d{2}|\d{4})-(\d{2})$/);
+    if (!match) return null;
+    const year = match[1].length === 2 ? 2000 + Number(match[1]) : Number(match[1]);
+    const month = Number(match[2]) - 1;
+    return getPeriodRange("month", new Date(year, month, 1));
+  }
+  if (grain === "day") {
+    return getPeriodRange("day", parseLocalDate(label));
+  }
+  return null;
 }
 
 function weekRange(year, week) {
@@ -2183,6 +2220,7 @@ function renderTopExpenses(transactions) {
 }
 
 function renderTransactions() {
+  updateMobileTransactionsBackButton();
   const query = els.searchInput.value.toLowerCase();
   const category = els.categoryFilter.value;
   const type = els.typeFilter.value;
@@ -2285,6 +2323,20 @@ function closeTransactionFilters() {
   document.body.classList.remove("mobile-filter-open");
 }
 
+function updateMobileTransactionsBackButton() {
+  if (!els.mobileTransactionsBackButton) return;
+  const shouldShow = currentView === "transactions" && Boolean(transactionReturnView);
+  els.mobileTransactionsBackButton.classList.toggle("hidden", !shouldShow);
+  const label = transactionReturnView === "analytics" ? tr("pageTitles.analytics") : tr("pageTitles.dashboard");
+  els.mobileTransactionsBackButton.innerHTML = `&lsaquo; ${label}`;
+}
+
+function returnFromTransactionDrilldown() {
+  const target = transactionReturnView || "dashboard";
+  transactionReturnView = null;
+  setView(target);
+}
+
 function resetTransactionPageAndRender() {
   transactionPage = 1;
   renderTransactions();
@@ -2329,6 +2381,7 @@ function openCategoryTransactions(category) {
   els.transactionStartDate.value = toDateInputValue(range.start);
   els.transactionEndDate.value = toDateInputValue(range.end);
   transactionPage = 1;
+  transactionReturnView = currentView === "analytics" ? "analytics" : "dashboard";
   setView("transactions");
 }
 
@@ -2353,6 +2406,7 @@ function openDashboardTransactions(kind, value = "") {
   }
 
   transactionPage = 1;
+  transactionReturnView = "dashboard";
   setView("transactions");
 }
 
@@ -2365,6 +2419,7 @@ function openExpenseTransaction(query) {
   els.transactionStartDate.value = toDateInputValue(range.start);
   els.transactionEndDate.value = toDateInputValue(range.end);
   transactionPage = 1;
+  transactionReturnView = "dashboard";
   setView("transactions");
 }
 
@@ -2687,6 +2742,7 @@ function openMacroTransactions(label) {
   els.transactionStartDate.value = toDateInputValue(range.start);
   els.transactionEndDate.value = toDateInputValue(range.end);
   transactionPage = 1;
+  transactionReturnView = "analytics";
   setView("transactions");
 }
 

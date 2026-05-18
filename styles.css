@@ -433,9 +433,271 @@ input:hover {
 
 @media (min-width: 761px) {
   .mobile-filter-button,
+  .mobile-transactions-head,
   .mobile-sheet-head,
   .mobile-settings-panel {
     display: none !important;
+  }
+}
+
+/* Mobile cleanup pass: compact controls, readable cards, no floating controls over data. */
+@media (max-width: 760px) {
+  .sidebar {
+    transition: transform 0.22s ease, opacity 0.22s ease !important;
+  }
+
+  body.mobile-nav-hidden .sidebar {
+    transform: translateY(calc(90px + env(safe-area-inset-bottom))) !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
+  .topbar {
+    gap: 10px !important;
+  }
+
+  .topbar h1 {
+    font-size: clamp(32px, 10vw, 42px) !important;
+  }
+
+  .period-nav {
+    width: min(220px, 74vw) !important;
+    display: grid !important;
+    grid-template-columns: 34px minmax(0, 1fr) 34px !important;
+    gap: 2px !important;
+    padding: 3px !important;
+    margin: 0 auto !important;
+  }
+
+  .period-nav .icon-button {
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    font-size: 20px !important;
+    line-height: 1 !important;
+    color: #111827 !important;
+  }
+
+  #currentPeriodButton {
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 0 4px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    font-size: 13px !important;
+  }
+
+  .period-summary {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+    padding: 16px !important;
+  }
+
+  .legend {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+
+  .legend span {
+    min-width: 0 !important;
+    justify-content: center !important;
+    padding: 7px 8px !important;
+    border-radius: 999px !important;
+    background: #f6f7f8 !important;
+    color: #667085 !important;
+    font-size: 10px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .legend i {
+    width: 8px !important;
+    height: 8px !important;
+    flex: 0 0 auto !important;
+  }
+
+  .legend-income {
+    background: #14804a !important;
+  }
+
+  .legend-expense {
+    background: #f97316 !important;
+  }
+
+  .legend-net {
+    background: #2563eb !important;
+  }
+
+  .metric {
+    padding: 16px !important;
+    min-height: 104px !important;
+  }
+
+  .metric span {
+    font-size: 12px !important;
+  }
+
+  .metric small {
+    display: block !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    line-height: 1.25 !important;
+    font-size: 11px !important;
+    max-height: 2.5em !important;
+  }
+
+  .panel {
+    padding: 18px !important;
+  }
+
+  .panel-head {
+    display: flex !important;
+    align-items: flex-start !important;
+    justify-content: space-between !important;
+    gap: 10px !important;
+  }
+
+  .panel-head h2 {
+    min-width: 0 !important;
+    max-width: 68% !important;
+    margin: 0 !important;
+    font-size: 17px !important;
+    line-height: 1.15 !important;
+    white-space: normal !important;
+  }
+
+  .panel-head span,
+  #trendLabel,
+  #analysisRange {
+    max-width: 42% !important;
+    text-align: right !important;
+    font-size: 11px !important;
+    white-space: normal !important;
+    line-height: 1.25 !important;
+  }
+
+  .period-breakdown {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+
+  .period-breakdown button {
+    padding: 12px !important;
+    min-height: 82px !important;
+  }
+
+  .period-breakdown strong {
+    font-size: clamp(15px, 4.8vw, 18px) !important;
+    white-space: nowrap !important;
+  }
+
+  .period-breakdown small {
+    font-size: 10px !important;
+    white-space: normal !important;
+    line-height: 1.25 !important;
+  }
+
+  .weekly-breakdown {
+    gap: 6px !important;
+  }
+
+  .weekly-head {
+    margin-top: 4px !important;
+    padding: 0 2px !important;
+    font-size: 12px !important;
+  }
+
+  .weekly-row {
+    grid-template-columns: 82px minmax(0, 1fr) auto !important;
+    padding: 10px 12px !important;
+    min-height: 54px !important;
+  }
+
+  .weekly-row > span:nth-child(3) {
+    display: none !important;
+  }
+
+  .weekly-row > span:nth-child(4) {
+    font-size: 13px !important;
+    white-space: nowrap !important;
+  }
+
+  .weekly-bars {
+    height: 18px !important;
+  }
+
+  .mobile-transactions-head {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 10px !important;
+    margin-top: -2px !important;
+  }
+
+  .mobile-return-button,
+  #transactionsView .mobile-filter-button {
+    position: static !important;
+    width: auto !important;
+    height: 34px !important;
+    min-height: 34px !important;
+    padding: 0 12px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border: 0 !important;
+    border-radius: 999px !important;
+    background: #ffffff !important;
+    color: #111827 !important;
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.07) !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+  }
+
+  .mobile-return-button.hidden {
+    visibility: hidden !important;
+  }
+
+  #transactionsView .toolbar {
+    max-height: 72dvh !important;
+    padding-top: 14px !important;
+  }
+
+  .mobile-sheet-head {
+    position: sticky !important;
+    top: -14px !important;
+    z-index: 1 !important;
+    padding: 8px 0 10px !important;
+    background: rgba(255, 255, 255, 0.96) !important;
+  }
+
+  .mobile-sheet-head .icon-button {
+    width: 34px !important;
+    height: 34px !important;
+  }
+
+  .bank-grid {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    overflow: visible !important;
+    padding-bottom: 0 !important;
+  }
+
+  .bank-grid span {
+    padding: 9px 12px !important;
+    font-size: 12px !important;
+  }
+
+  .analysis-controls {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+  }
+
+  .analysis-controls .chip {
+    min-width: 0 !important;
+    padding: 10px 6px !important;
   }
 }
 
@@ -3589,8 +3851,221 @@ th:nth-child(7) {
 
 @media (min-width: 761px) {
   .mobile-filter-button,
+  .mobile-transactions-head,
   .mobile-sheet-head,
   .mobile-settings-panel {
     display: none !important;
+  }
+}
+
+/* Final mobile fixes: these rules intentionally sit last. */
+@media (max-width: 760px) {
+  .sidebar {
+    transition: transform 0.22s ease, opacity 0.22s ease !important;
+  }
+
+  body.mobile-nav-hidden .sidebar {
+    transform: translateY(calc(90px + env(safe-area-inset-bottom))) !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
+  .topbar h1 {
+    font-size: clamp(32px, 10vw, 42px) !important;
+  }
+
+  .period-nav {
+    width: min(220px, 74vw) !important;
+    display: grid !important;
+    grid-template-columns: 34px minmax(0, 1fr) 34px !important;
+    gap: 2px !important;
+    padding: 3px !important;
+    margin: 0 auto !important;
+  }
+
+  .period-nav .icon-button {
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    font-size: 20px !important;
+    color: #111827 !important;
+  }
+
+  #currentPeriodButton {
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 0 4px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    font-size: 13px !important;
+  }
+
+  .period-summary {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+    padding: 16px !important;
+  }
+
+  .legend {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+
+  .legend span {
+    justify-content: center !important;
+    padding: 7px 8px !important;
+    border-radius: 999px !important;
+    background: #f6f7f8 !important;
+    color: #667085 !important;
+    font-size: 10px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .legend-income {
+    background: #14804a !important;
+  }
+
+  .legend-expense {
+    background: #f97316 !important;
+  }
+
+  .legend-net {
+    background: #2563eb !important;
+  }
+
+  .metric {
+    padding: 16px !important;
+    min-height: 104px !important;
+  }
+
+  .metric small {
+    display: block !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    line-height: 1.25 !important;
+    font-size: 11px !important;
+    max-height: 2.5em !important;
+  }
+
+  .panel {
+    padding: 18px !important;
+  }
+
+  .panel-head h2 {
+    max-width: 68% !important;
+    font-size: 17px !important;
+    line-height: 1.15 !important;
+    white-space: normal !important;
+  }
+
+  .panel-head span,
+  #trendLabel,
+  #analysisRange {
+    max-width: 42% !important;
+    text-align: right !important;
+    font-size: 11px !important;
+    white-space: normal !important;
+    line-height: 1.25 !important;
+  }
+
+  .period-breakdown {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+
+  .period-breakdown button {
+    padding: 12px !important;
+    min-height: 82px !important;
+  }
+
+  .period-breakdown strong {
+    font-size: clamp(15px, 4.8vw, 18px) !important;
+    white-space: nowrap !important;
+  }
+
+  .period-breakdown small {
+    font-size: 10px !important;
+    white-space: normal !important;
+    line-height: 1.25 !important;
+  }
+
+  .weekly-row {
+    grid-template-columns: 82px minmax(0, 1fr) auto !important;
+    padding: 10px 12px !important;
+    min-height: 54px !important;
+  }
+
+  .weekly-row > span:nth-child(3) {
+    display: none !important;
+  }
+
+  .weekly-row > span:nth-child(4) {
+    display: block !important;
+    font-size: 13px !important;
+    white-space: nowrap !important;
+  }
+
+  .mobile-transactions-head {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 10px !important;
+  }
+
+  .mobile-return-button,
+  #transactionsView .mobile-filter-button {
+    position: static !important;
+    width: auto !important;
+    height: 34px !important;
+    min-height: 34px !important;
+    padding: 0 12px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border: 0 !important;
+    border-radius: 999px !important;
+    background: #ffffff !important;
+    color: #111827 !important;
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.07) !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+  }
+
+  .mobile-return-button.hidden {
+    visibility: hidden !important;
+  }
+
+  .mobile-sheet-head {
+    position: sticky !important;
+    top: -14px !important;
+    z-index: 1 !important;
+    padding: 8px 0 10px !important;
+    background: rgba(255, 255, 255, 0.96) !important;
+  }
+
+  .bank-grid {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    overflow: visible !important;
+    padding-bottom: 0 !important;
+  }
+
+  .bank-grid span {
+    padding: 9px 12px !important;
+    font-size: 12px !important;
+  }
+
+  .analysis-controls {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+  }
+
+  .analysis-controls .chip {
+    min-width: 0 !important;
+    padding: 10px 6px !important;
   }
 }
