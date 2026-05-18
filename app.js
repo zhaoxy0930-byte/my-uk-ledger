@@ -136,6 +136,9 @@ function hydrateControls() {
   if (els.languageSelect) els.languageSelect.value = language;
   if (els.mobileLanguageSelect) els.mobileLanguageSelect.value = language;
   if (els.mobilePeriodSelect && els.periodSelect) els.mobilePeriodSelect.value = els.periodSelect.value;
+  document.querySelectorAll("[data-grain]").forEach((item) => {
+    item.classList.toggle("active", item.dataset.grain === analysisGrain);
+  });
   fillCategorySelect(els.categoryFilter, true);
   fillCategorySelect(els.ruleCategory, false);
   applyLanguageStatic();
@@ -147,6 +150,19 @@ function setLanguage(nextLanguage) {
   document.documentElement.lang = language === "zh" ? "zh-CN" : "en-GB";
   applyLanguageStatic();
   hydrateControls();
+  render();
+}
+
+function setPeriodMode(period) {
+  if (!period) return;
+  if (els.periodSelect) els.periodSelect.value = period;
+  if (els.mobilePeriodSelect) els.mobilePeriodSelect.value = period;
+  analysisGrain = period;
+  document.querySelectorAll("[data-grain]").forEach((item) => {
+    item.classList.toggle("active", item.dataset.grain === period);
+  });
+  transactionPage = 1;
+  updateCurrentPeriodButton();
   render();
 }
 
@@ -174,11 +190,7 @@ function bindEvents() {
     });
   });
 
-  els.periodSelect.addEventListener("change", () => {
-    if (els.mobilePeriodSelect) els.mobilePeriodSelect.value = els.periodSelect.value;
-    updateCurrentPeriodButton();
-    render();
-  });
+  els.periodSelect.addEventListener("change", () => setPeriodMode(els.periodSelect.value));
   els.prevPeriodButton.addEventListener("click", () => shiftPeriod(-1));
   els.currentPeriodButton.addEventListener("click", () => {
     periodAnchor = new Date();
@@ -196,11 +208,7 @@ function bindEvents() {
     });
   }
   if (els.mobilePeriodSelect && els.periodSelect) {
-    els.mobilePeriodSelect.addEventListener("change", () => {
-      els.periodSelect.value = els.mobilePeriodSelect.value;
-      updateCurrentPeriodButton();
-      render();
-    });
+    els.mobilePeriodSelect.addEventListener("change", () => setPeriodMode(els.mobilePeriodSelect.value));
   }
   if (els.authForm) {
     els.authForm.addEventListener("submit", (event) => {
@@ -273,13 +281,7 @@ function bindEvents() {
 
   document.querySelectorAll("[data-grain]").forEach((button) => {
     button.addEventListener("click", () => {
-      analysisGrain = button.dataset.grain;
-      if (els.periodSelect) els.periodSelect.value = analysisGrain;
-      if (els.mobilePeriodSelect) els.mobilePeriodSelect.value = analysisGrain;
-      document.querySelectorAll("[data-grain]").forEach((item) => item.classList.remove("active"));
-      button.classList.add("active");
-      updateCurrentPeriodButton();
-      render();
+      setPeriodMode(button.dataset.grain);
     });
   });
 
@@ -2086,7 +2088,9 @@ function renderCashflowChart(period, range) {
   const windowRange = getChartWindowRange(period, range);
   const points = fillPeriodPoints(transactionsInRange(reportingTransactions(state.transactions), windowRange), grain, windowRange);
   drawChart(els.cashflowChart, points, { mode: "cashflow" });
-  els.trendLabel.textContent = `${formatRange(windowRange)} · ${tr("by")} ${displayPeriodName(grain)}`;
+  els.trendLabel.textContent = isMobileLayout()
+    ? `${displayPeriodName(grain)} view`
+    : `${formatRange(windowRange)} · ${tr("by")} ${displayPeriodName(grain)}`;
 }
 
 function renderCategoryBars(transactions) {
@@ -2113,23 +2117,23 @@ function renderPeriodBreakdown(current, previous, period) {
   els.periodBreakdown.querySelectorAll("[data-dashboard-drilldown]").forEach((button) => {
     button.addEventListener("click", () => openDashboardTransactions(button.dataset.dashboardDrilldown, button.dataset.merchant || ""));
   });
-  renderTimelineBreakdown(current, period);
+  renderTimelineBreakdown(current, period, getPeriodRange(period, periodAnchor));
 }
 
-function renderTimelineBreakdown(transactions, period) {
+function renderTimelineBreakdown(transactions, period, range) {
   if (!els.weeklyBreakdown) return;
   const grain = period === "year" ? "month" : period === "month" ? "week" : "day";
-  const points = groupByPeriod(transactions, grain);
+  const points = fillPeriodPoints(transactions, grain, range);
   const max = Math.max(...points.map((item) => Math.max(item.income, item.expense)), 0);
   els.weeklyBreakdown.innerHTML = points.length ? `
     <div class="weekly-head"><strong>${displayPeriodName(grain)} breakdown</strong><span>${tr("weeklyLegend")}</span></div>
-    ${points.map((point) => {
+    ${points.map((point, index) => {
       const count = transactions.filter((item) => periodKey(parseLocalDate(item.date), grain) === point.label).length;
       const incomePercent = max ? Math.max(3, (point.income / max) * 100) : 0;
       const expensePercent = max ? Math.max(3, (point.expense / max) * 100) : 0;
       return `
         <button type="button" class="weekly-row" data-breakdown-label="${escapeHtml(point.label)}" data-breakdown-grain="${grain}">
-          <span><strong>${escapeHtml(shortPeriodLabel(point.label, grain))}</strong><small>${tr("items")(count)}</small></span>
+          <span><strong>${escapeHtml(shortPeriodLabel(point.label, grain, index))}</strong><small>${tr("items")(count)}</small></span>
           <span class="weekly-bars">
             <i class="weekly-income" style="width:${incomePercent}%"><b>In ${money(point.income)}</b></i>
             <i class="weekly-expense" style="width:${expensePercent}%"><b>Out ${money(point.expense)}</b></i>
@@ -2229,7 +2233,7 @@ function renderTransactions() {
   const endDate = els.transactionEndDate.value;
   const startBoundary = startDate ? parseLocalDate(startDate) : null;
   const endBoundary = endDate ? endOfLocalDay(parseLocalDate(endDate)) : null;
-  const pageSize = Number(els.pageSizeSelect.value || 25);
+  const pageSize = isMobileLayout() ? 10 : Number(els.pageSizeSelect.value || 25);
   let rows = [...state.transactions];
   const duplicateKeys = type === "duplicates" ? duplicateTransactionKeys(rows) : new Set();
 
@@ -3120,9 +3124,9 @@ function displayPeriodName(period) {
   return language === "zh" ? name : name.charAt(0).toUpperCase() + name.slice(1);
 }
 
-function shortPeriodLabel(label, grain) {
+function shortPeriodLabel(label, grain, index = 0) {
   const value = String(label || "");
-  if (grain === "week") return value.replace(/^\d{4}-W/, "W");
+  if (grain === "week") return language === "zh" ? `第${index + 1}周` : `Week ${index + 1}`;
   if (grain === "month") return value.replace(/^(\d{4})-(\d{2})$/, "$1/$2");
   if (grain === "day") return value.slice(5);
   return value;
