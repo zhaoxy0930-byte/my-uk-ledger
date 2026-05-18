@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Ledger UK</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-mark">£</div>
+          <div>
+            <strong>Ledger UK</strong>
+            <span>Personal finance cockpit</span>
+          </div>
+        </div>
+
+        <nav class="nav" aria-label="Primary">
+          <button class="nav-item active" data-view="dashboard" title="Dashboard">
+            <span class="icon">⌂</span><span>Overview</span>
+          </button>
+          <button class="nav-item" data-view="import" title="Import">
+            <span class="icon">⇪</span><span>Import</span>
+          </button>
+          <button class="nav-item" data-view="transactions" title="Transactions">
+            <span class="icon">☷</span><span>Transactions</span>
+          </button>
+          <button class="nav-item" data-view="analytics" title="Analytics">
+            <span class="icon">◫</span><span>Analytics</span>
+          </button>
+          <button class="nav-item" data-view="recurring" title="Recurring">
+            <span class="icon">↻</span><span>Recurring</span>
+          </button>
+          <button class="nav-item" data-view="rules" title="Rules">
+            <span class="icon">⚙</span><span>Rules</span>
+          </button>
+        </nav>
+
+        <div class="privacy-note">
+          <strong>Local first</strong>
+          <span>This prototype keeps bank data on this device. Transactions are saved in your browser.</span>
+        </div>
+      </aside>
+
+      <main class="main">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">UK bank statement analytics</p>
+            <h1 id="pageTitle">Overview</h1>
+          </div>
+          <div class="topbar-actions">
+            <span class="save-indicator" id="saveIndicator">Auto save</span>
+            <button class="button ghost compact cloud-button" id="authOpenButton" type="button">
+              <span id="authStatus">Cloud off</span>
+            </button>
+            <button class="icon-button privacy-toggle" id="privacyToggleButton" type="button" title="Hide/show amounts" aria-pressed="false">◌</button>
+            <select id="languageSelect" class="language-select" title="Language">
+              <option value="en">EN</option>
+              <option value="zh">中文</option>
+            </select>
+            <label class="select-label">
+              <span>Period</span>
+              <select id="periodSelect">
+                <option value="month">Month</option>
+                <option value="week">Week</option>
+                <option value="day">Day</option>
+                <option value="year">Year</option>
+              </select>
+            </label>
+            <div class="period-nav" aria-label="Period navigation">
+              <button class="icon-button" id="prevPeriodButton" title="Previous period">‹</button>
+              <button class="button ghost" id="currentPeriodButton" title="Back to current period">This month</button>
+              <button class="icon-button" id="nextPeriodButton" title="Next period">›</button>
+            </div>
+            <button class="button ghost" id="seedButton" title="Load demo data">Demo data</button>
+            <button class="button danger" id="resetButton" title="Clear local data">Clear</button>
+          </div>
+        </header>
+
+        <section class="view active" id="dashboardView">
+          <div class="period-summary">
+            <div>
+              <strong id="periodRangeLabel">Current period</strong>
+              <span id="periodCompareLabel">Compared with previous period</span>
+            </div>
+            <div class="legend">
+              <span><i class="legend-income"></i>Income</span>
+              <span><i class="legend-expense"></i>Expense</span>
+              <span><i class="legend-net"></i>Net cashflow</span>
+            </div>
+          </div>
+          <div class="metric-grid">
+            <article class="metric clickable-metric" data-dashboard-drilldown="income" tabindex="0">
+              <span>Income</span>
+              <strong id="incomeMetric">£0.00</strong>
+              <small id="incomeDelta">Waiting for data</small>
+            </article>
+            <article class="metric clickable-metric" data-dashboard-drilldown="expense" tabindex="0">
+              <span>Expense</span>
+              <strong id="expenseMetric">£0.00</strong>
+              <small id="expenseDelta">Waiting for data</small>
+            </article>
+            <article class="metric clickable-metric" data-dashboard-drilldown="net" tabindex="0">
+              <span>Net cashflow</span>
+              <strong id="netMetric">£0.00</strong>
+              <small id="netDelta">Income minus expense</small>
+            </article>
+            <article class="metric clickable-metric" data-dashboard-drilldown="review" tabindex="0">
+              <span>Needs review</span>
+              <strong id="reviewMetric">0</strong>
+              <small>Low-confidence categories</small>
+            </article>
+          </div>
+
+          <div class="dashboard-grid">
+            <section class="panel wide">
+              <div class="panel-head">
+                <h2>Cashflow trend</h2>
+                <span id="trendLabel">By month</span>
+              </div>
+              <div class="chart-wrap">
+                <canvas id="cashflowChart" height="250"></canvas>
+                <div class="chart-tooltip" id="cashflowTooltip"></div>
+              </div>
+              <div id="periodBreakdown" class="period-breakdown"></div>
+              <div id="weeklyBreakdown" class="weekly-breakdown"></div>
+            </section>
+            <section class="panel">
+              <div class="panel-head">
+                <h2>Expense categories</h2>
+                <span id="categoryTotal">£0.00</span>
+              </div>
+              <div id="categoryBars" class="bars"></div>
+            </section>
+            <section class="panel">
+              <div class="panel-head">
+                <h2>Insights</h2>
+                <span>Auto generated</span>
+              </div>
+              <div id="insights" class="insights"></div>
+            </section>
+            <section class="panel wide">
+              <div class="panel-head">
+                <h2>Top expenses</h2>
+                <button class="text-button" id="viewTopExpensesButton" type="button">View all</button>
+              </div>
+              <div id="recentTransactions" class="compact-list"></div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="importView">
+          <div class="import-layout">
+            <section class="dropzone" id="dropzone">
+              <input id="fileInput" type="file" accept=".csv,.txt,.ofx,.qif,image/*,.pdf" multiple />
+              <div class="drop-icon">⇪</div>
+              <h2>Upload bank statements or screenshots</h2>
+              <p>Supports CSV, TXT, text-based bank PDFs, and OCR for JPG, PNG, WebP screenshots. You can select or drop multiple files at once.</p>
+              <button class="button primary" id="chooseFileButton">Choose files</button>
+            </section>
+            <section class="panel import-help">
+              <h2>Built-in recognition</h2>
+              <div class="bank-grid">
+                <span>Monzo</span><span>Starling</span><span>Barclays</span><span>HSBC</span>
+                <span>Lloyds</span><span>NatWest</span><span>Santander</span><span>Revolut</span>
+                <span>Chase UK</span><span>CSV/PDF/screenshots</span>
+              </div>
+              <p>Automatically looks for Date, Description, Merchant, Amount, Money In, Money Out, Balance, and common PDF statement rows.</p>
+            </section>
+          </div>
+          <section class="panel">
+            <div class="panel-head">
+              <h2>Import results</h2>
+              <span id="importSummary">No imports yet</span>
+            </div>
+            <div id="importPreview" class="import-preview"></div>
+          </section>
+        </section>
+
+        <section class="view" id="transactionsView">
+          <div class="toolbar">
+            <input id="searchInput" type="search" placeholder="Search merchant, note, bank account" />
+            <select id="categoryFilter"></select>
+            <select id="typeFilter">
+              <option value="all">All</option>
+              <option value="needs_action">Needs action</option>
+              <option value="uncategorised">Uncategorised</option>
+              <option value="review">Needs review</option>
+              <option value="income">Income</option>
+              <option value="expense">Expense</option>
+              <option value="refunds">Refunds</option>
+              <option value="duplicates">Potential duplicates</option>
+            </select>
+            <select id="transactionSortSelect" title="Sort">
+              <option value="date_desc">Newest date</option>
+              <option value="date_asc">Oldest date</option>
+              <option value="amount_abs_desc">Amount high to low</option>
+              <option value="amount_abs_asc">Amount low to high</option>
+              <option value="merchant_asc">Merchant A-Z</option>
+            </select>
+            <div class="date-filter">
+              <input id="transactionStartDate" type="date" title="Start date" />
+              <span>to</span>
+              <input id="transactionEndDate" type="date" title="End date" />
+              <button class="button ghost compact" id="usePeriodDateFilterButton" type="button">Current period</button>
+              <button class="button ghost compact" id="clearDateFilterButton" type="button">Clear dates</button>
+              <button class="button ghost compact" id="findDuplicatesButton" type="button">Find duplicates</button>
+            </div>
+            <select id="pageSizeSelect" title="Rows per page">
+              <option value="10">10 per page</option>
+              <option value="25" selected>25 per page</option>
+              <option value="50">50 per page</option>
+              <option value="100">100 per page</option>
+            </select>
+          </div>
+          <div class="table-meta">
+            <span id="transactionCountLabel">0 transactions</span>
+            <div class="pagination">
+              <button class="button ghost" id="prevPageButton">Previous</button>
+              <span id="pageLabel">Page 1</span>
+              <button class="button ghost" id="nextPageButton">Next</button>
+            </div>
+          </div>
+          <section class="panel table-panel">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Merchant / Description</th>
+                  <th>Bank</th>
+                  <th>Category</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="transactionTable"></tbody>
+            </table>
+          </section>
+        </section>
+
+        <section class="view" id="analyticsView">
+          <div class="analysis-controls">
+            <button class="chip active" data-grain="day">Day</button>
+            <button class="chip" data-grain="week">Week</button>
+            <button class="chip" data-grain="month">Month</button>
+            <button class="chip" data-grain="year">Year</button>
+          </div>
+          <div class="metric-grid analysis-metrics">
+            <article class="metric">
+              <span>Analysed income</span>
+              <strong id="analysisIncomeMetric">£0.00</strong>
+              <small id="analysisIncomeDelta">No comparison</small>
+            </article>
+            <article class="metric">
+              <span>Analysed expense</span>
+              <strong id="analysisExpenseMetric">£0.00</strong>
+              <small id="analysisExpenseDelta">No comparison</small>
+            </article>
+            <article class="metric">
+              <span>Peak spend period</span>
+              <strong id="analysisPeakMetric">£0.00</strong>
+              <small id="analysisPeakLabel">Waiting for data</small>
+            </article>
+            <article class="metric">
+              <span>Average spend</span>
+              <strong id="analysisAverageMetric">£0.00</strong>
+              <small id="analysisAverageLabel">By current grain</small>
+            </article>
+          </div>
+          <div class="dashboard-grid">
+            <section class="panel wide">
+              <div class="panel-head">
+                <h2 id="analysisTitle">Daily view</h2>
+                <span id="analysisRange">All data</span>
+              </div>
+              <div class="chart-wrap">
+                <canvas id="analysisChart" height="280"></canvas>
+                <div class="chart-tooltip" id="analysisTooltip"></div>
+              </div>
+            </section>
+            <section class="panel">
+              <div class="panel-head">
+                <h2>Merchant ranking</h2>
+                <span>Expense</span>
+              </div>
+              <div id="merchantRanking" class="ranking"></div>
+            </section>
+            <section class="panel">
+              <div class="panel-head">
+                <h2>Budget pressure</h2>
+                <span>By category</span>
+              </div>
+              <div id="budgetPressure" class="bars"></div>
+            </section>
+            <section class="panel wide">
+              <div class="panel-head">
+                <h2>Macro categories</h2>
+                <span id="macroCategoryTotal">£0.00</span>
+              </div>
+              <div class="macro-layout">
+                <canvas id="macroPieChart" width="220" height="220"></canvas>
+                <div id="macroCategoryBars" class="bars"></div>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="recurringView">
+          <div class="dashboard-grid recurring-grid">
+            <section class="panel recurring-income-panel">
+              <div class="panel-head">
+                <h2>Recurring income</h2>
+                <span>Salary etc.</span>
+              </div>
+              <div id="incomeRecurring" class="compact-list"></div>
+            </section>
+            <section class="panel recurring-expense-panel">
+              <div class="panel-head">
+                <h2>Recurring expenses</h2>
+                <span>Bills/subscriptions</span>
+              </div>
+              <div id="expenseRecurring" class="compact-list"></div>
+            </section>
+            <section class="panel wide recurring-detail-panel">
+              <div class="panel-head">
+                <h2>Recurring items this period</h2>
+                <span>Within current range</span>
+              </div>
+              <div id="recurringTimeline" class="timeline"></div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="rulesView">
+          <div class="rules-layout">
+            <section class="panel">
+              <div class="panel-head">
+                <h2>Auto-categorisation rules</h2>
+                <span id="ruleCount">0 rules</span>
+              </div>
+              <form id="ruleForm" class="rule-form">
+                <input id="ruleKeyword" placeholder="Keyword, e.g. TESCO" required />
+                <select id="ruleCategory"></select>
+                <button class="button primary" type="submit">Add</button>
+              </form>
+              <div id="rulesList" class="rules-list"></div>
+            </section>
+            <section class="panel">
+              <h2>Category learning</h2>
+              <p>When you manually change a category in the transaction table, the app remembers the merchant keyword and uses your choice next time.</p>
+              <form id="categoryForm" class="rule-form">
+                <input id="categoryName" placeholder="New category, e.g. Sports" required />
+                <button class="button primary" type="submit">Add category</button>
+              </form>
+              <div id="customCategoriesList" class="rules-list"></div>
+            </section>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div class="modal-backdrop hidden" id="authModal" aria-hidden="true">
+      <div class="auth-dialog" role="dialog" aria-modal="true" aria-labelledby="authDialogTitle">
+        <button class="icon-button modal-close" id="authCloseButton" type="button" title="Close">×</button>
+        <div>
+          <p class="eyebrow" id="authDialogEyebrow">Cloud sync</p>
+          <h2 id="authDialogTitle">Sign in to Ledger UK</h2>
+          <p class="auth-copy" id="authDialogCopy">Save your ledger to Supabase so it can follow you across devices.</p>
+        </div>
+        <form class="auth-box" id="authForm">
+          <input id="authEmail" type="email" placeholder="Email" autocomplete="email" />
+          <input id="authPassword" type="password" placeholder="Password" autocomplete="current-password" />
+          <div class="auth-actions">
+            <button class="button primary" id="signInButton" type="submit">Sign in</button>
+            <button class="button ghost" id="signUpButton" type="button">Sign up</button>
+            <button class="button ghost hidden" id="signOutButton" type="button">Sign out</button>
+          </div>
+          <span id="authMessage" class="auth-message">Cloud off</span>
+        </form>
+      </div>
+    </div>
+
+    <template id="emptyStateTemplate">
+      <div class="empty-state">
+        <strong>No data yet</strong>
+        <span>Import a bank statement, or load demo data first.</span>
+      </div>
+    </template>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
