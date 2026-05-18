@@ -104,14 +104,14 @@ window.addEventListener("resize", debounce(() => render(), 160));
 
 function cacheElements() {
   [
-    "pageTitle", "periodSelect", "prevPeriodButton", "currentPeriodButton", "nextPeriodButton", "privacyToggleButton", "languageSelect", "authOpenButton", "authModal", "authCloseButton", "authDialogEyebrow", "authDialogTitle", "authDialogCopy", "authForm", "authEmail", "authPassword", "signInButton", "signUpButton", "signOutButton", "authStatus", "authMessage", "seedButton", "resetButton", "saveIndicator", "incomeMetric", "expenseMetric",
+    "pageTitle", "periodSelect", "mobilePeriodSelect", "prevPeriodButton", "currentPeriodButton", "nextPeriodButton", "privacyToggleButton", "languageSelect", "mobileLanguageSelect", "authOpenButton", "mobileAuthOpenButton", "authModal", "authCloseButton", "authDialogEyebrow", "authDialogTitle", "authDialogCopy", "authForm", "authEmail", "authPassword", "signInButton", "signUpButton", "signOutButton", "authStatus", "authMessage", "seedButton", "mobileSeedButton", "resetButton", "mobileResetButton", "saveIndicator", "incomeMetric", "expenseMetric",
     "netMetric", "reviewMetric", "incomeDelta", "expenseDelta", "netDelta", "cashflowChart", "trendLabel",
     "cashflowTooltip", "periodRangeLabel", "periodCompareLabel", "periodBreakdown", "weeklyBreakdown",
     "analysisChart", "analysisTooltip", "analysisIncomeMetric", "analysisExpenseMetric", "analysisPeakMetric",
     "analysisAverageMetric", "analysisIncomeDelta", "analysisExpenseDelta", "analysisPeakLabel", "analysisAverageLabel",
     "categoryBars", "categoryTotal", "insights", "recentTransactions", "viewTopExpensesButton",
     "dropzone", "fileInput", "chooseFileButton", "importSummary", "importPreview",
-    "searchInput", "categoryFilter", "typeFilter", "transactionSortSelect", "transactionStartDate", "transactionEndDate",
+    "transactionFilterButton", "transactionFilterCloseButton", "transactionFilterBackdrop", "searchInput", "categoryFilter", "typeFilter", "transactionSortSelect", "transactionStartDate", "transactionEndDate",
     "usePeriodDateFilterButton", "clearDateFilterButton", "findDuplicatesButton", "pageSizeSelect", "transactionCountLabel",
     "prevPageButton", "nextPageButton", "pageLabel", "transactionTable", "mobileTransactionList", "transactionSheet", "sheetCloseButton", "sheetMerchant", "sheetMeta", "sheetOrb", "sheetDate", "sheetAmount", "sheetMerchantInput", "sheetDescription", "sheetCategory", "sheetRefundButton", "sheetDeleteButton", "sheetSaveButton", "merchantRanking",
     "budgetPressure", "macroPieChart", "macroCategoryBars", "macroCategoryTotal", "analysisTitle", "analysisRange", "incomeRecurring", "expenseRecurring",
@@ -124,9 +124,20 @@ function cacheElements() {
 
 function hydrateControls() {
   if (els.languageSelect) els.languageSelect.value = language;
+  if (els.mobileLanguageSelect) els.mobileLanguageSelect.value = language;
+  if (els.mobilePeriodSelect && els.periodSelect) els.mobilePeriodSelect.value = els.periodSelect.value;
   fillCategorySelect(els.categoryFilter, true);
   fillCategorySelect(els.ruleCategory, false);
   applyLanguageStatic();
+}
+
+function setLanguage(nextLanguage) {
+  language = nextLanguage;
+  localStorage.setItem("ledger-uk-language", language);
+  document.documentElement.lang = language === "zh" ? "zh-CN" : "en-GB";
+  applyLanguageStatic();
+  hydrateControls();
+  render();
 }
 
 function bindEvents() {
@@ -151,6 +162,7 @@ function bindEvents() {
   });
 
   els.periodSelect.addEventListener("change", () => {
+    if (els.mobilePeriodSelect) els.mobilePeriodSelect.value = els.periodSelect.value;
     updateCurrentPeriodButton();
     render();
   });
@@ -162,11 +174,18 @@ function bindEvents() {
   els.nextPeriodButton.addEventListener("click", () => shiftPeriod(1));
   if (els.languageSelect) {
     els.languageSelect.addEventListener("change", () => {
-      language = els.languageSelect.value;
-      localStorage.setItem("ledger-uk-language", language);
-      document.documentElement.lang = language === "zh" ? "zh-CN" : "en-GB";
-      applyLanguageStatic();
-      hydrateControls();
+      setLanguage(els.languageSelect.value);
+    });
+  }
+  if (els.mobileLanguageSelect) {
+    els.mobileLanguageSelect.addEventListener("change", () => {
+      setLanguage(els.mobileLanguageSelect.value);
+    });
+  }
+  if (els.mobilePeriodSelect && els.periodSelect) {
+    els.mobilePeriodSelect.addEventListener("change", () => {
+      els.periodSelect.value = els.mobilePeriodSelect.value;
+      updateCurrentPeriodButton();
       render();
     });
   }
@@ -177,6 +196,7 @@ function bindEvents() {
     });
   }
   if (els.authOpenButton) els.authOpenButton.addEventListener("click", () => openAuthModal());
+  if (els.mobileAuthOpenButton) els.mobileAuthOpenButton.addEventListener("click", () => openAuthModal());
   if (els.authCloseButton) els.authCloseButton.addEventListener("click", () => closeAuthModal());
   if (els.authModal) {
     els.authModal.addEventListener("click", (event) => {
@@ -213,6 +233,11 @@ function bindEvents() {
   }
   els.seedButton.addEventListener("click", loadDemoData);
   els.resetButton.addEventListener("click", resetData);
+  if (els.mobileSeedButton) els.mobileSeedButton.addEventListener("click", loadDemoData);
+  if (els.mobileResetButton) els.mobileResetButton.addEventListener("click", resetData);
+  if (els.transactionFilterButton) els.transactionFilterButton.addEventListener("click", () => openTransactionFilters());
+  if (els.transactionFilterCloseButton) els.transactionFilterCloseButton.addEventListener("click", () => closeTransactionFilters());
+  if (els.transactionFilterBackdrop) els.transactionFilterBackdrop.addEventListener("click", () => closeTransactionFilters());
   els.searchInput.addEventListener("input", () => clearMacroAndRenderTransactions());
   els.categoryFilter.addEventListener("change", () => clearMacroAndRenderTransactions());
   els.typeFilter.addEventListener("change", () => clearMacroAndRenderTransactions());
@@ -2244,6 +2269,22 @@ function categoryInitial(category) {
   return String(display || "?").trim().slice(0, 1).toUpperCase();
 }
 
+function openTransactionFilters() {
+  const toolbar = document.querySelector("#transactionsView .toolbar");
+  if (!toolbar) return;
+  toolbar.classList.add("open");
+  if (els.transactionFilterBackdrop) els.transactionFilterBackdrop.classList.add("open");
+  document.body.classList.add("mobile-filter-open");
+}
+
+function closeTransactionFilters() {
+  const toolbar = document.querySelector("#transactionsView .toolbar");
+  if (!toolbar) return;
+  toolbar.classList.remove("open");
+  if (els.transactionFilterBackdrop) els.transactionFilterBackdrop.classList.remove("open");
+  document.body.classList.remove("mobile-filter-open");
+}
+
 function resetTransactionPageAndRender() {
   transactionPage = 1;
   renderTransactions();
@@ -2387,7 +2428,7 @@ function renderRules() {
     <div class="rule-row">
       <input value="${escapeHtml(rule.keyword)}" data-rule-keyword="${rule.id}" aria-label="Rule keyword" />
       ${ruleCategorySelect(rule.id, rule.category)}
-      <button type="button" data-rule="${rule.id}">${tr("delete")}</button>
+      <button class="tile-delete" type="button" data-rule="${rule.id}" aria-label="${tr("delete")}">×</button>
     </div>
   `).join("");
   els.rulesList.querySelectorAll("input[data-rule-keyword]").forEach((input) => {
@@ -2408,7 +2449,7 @@ function renderRules() {
   els.customCategoriesList.innerHTML = customCategories.length ? customCategories.map((category) => `
     <div class="rule-row">
       <span><strong>${escapeHtml(category)}</strong></span>
-      <button type="button" data-category="${escapeHtml(category)}">${tr("delete")}</button>
+      <button class="tile-delete" type="button" data-category="${escapeHtml(category)}" aria-label="${tr("delete")}">×</button>
     </div>
   `).join("") : `<div class="empty-state"><span>${tr("noCustomCategories")}</span></div>`;
   els.customCategoriesList.querySelectorAll("button[data-category]").forEach((button) => {

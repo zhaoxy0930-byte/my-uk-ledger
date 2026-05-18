@@ -180,7 +180,13 @@
         </section>
 
         <section class="view" id="transactionsView">
+          <button class="mobile-filter-button" id="transactionFilterButton" type="button" title="Filter">⌕</button>
+          <div class="mobile-filter-backdrop" id="transactionFilterBackdrop" aria-hidden="true"></div>
           <div class="toolbar">
+            <div class="mobile-sheet-head">
+              <strong>Filters</strong>
+              <button class="icon-button" id="transactionFilterCloseButton" type="button">×</button>
+            </div>
             <input id="searchInput" type="search" placeholder="Search merchant, note, bank account" />
             <select id="categoryFilter"></select>
             <select id="typeFilter">
@@ -336,6 +342,33 @@
         </section>
 
         <section class="view" id="rulesView">
+          <section class="panel mobile-settings-panel">
+            <div class="panel-head">
+              <h2>Settings</h2>
+              <span>Account & display</span>
+            </div>
+            <button class="button ghost mobile-account-button" id="mobileAuthOpenButton" type="button">Account</button>
+            <label class="mobile-setting-row">
+              <span>Language</span>
+              <select id="mobileLanguageSelect">
+                <option value="en">EN</option>
+                <option value="zh">中文</option>
+              </select>
+            </label>
+            <label class="mobile-setting-row">
+              <span>Period mode</span>
+              <select id="mobilePeriodSelect">
+                <option value="month">Month</option>
+                <option value="week">Week</option>
+                <option value="day">Day</option>
+                <option value="year">Year</option>
+              </select>
+            </label>
+            <div class="mobile-settings-actions">
+              <button class="button ghost" id="mobileSeedButton" type="button">Demo data</button>
+              <button class="button danger" id="mobileResetButton" type="button">Clear</button>
+            </div>
+          </section>
           <div class="rules-layout">
             <section class="panel">
               <div class="panel-head">
