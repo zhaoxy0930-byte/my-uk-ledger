@@ -87,6 +87,7 @@ let supabaseClient = null;
 let currentUser = null;
 let cloudSaveTimer = null;
 let applyingCloudState = false;
+let sheetTransactionId = null;
 const chartState = new WeakMap();
 
 const els = {};
@@ -112,7 +113,7 @@ function cacheElements() {
     "dropzone", "fileInput", "chooseFileButton", "importSummary", "importPreview",
     "searchInput", "categoryFilter", "typeFilter", "transactionSortSelect", "transactionStartDate", "transactionEndDate",
     "usePeriodDateFilterButton", "clearDateFilterButton", "findDuplicatesButton", "pageSizeSelect", "transactionCountLabel",
-    "prevPageButton", "nextPageButton", "pageLabel", "transactionTable", "merchantRanking",
+    "prevPageButton", "nextPageButton", "pageLabel", "transactionTable", "mobileTransactionList", "transactionSheet", "sheetCloseButton", "sheetMerchant", "sheetMeta", "sheetOrb", "sheetDate", "sheetAmount", "sheetMerchantInput", "sheetDescription", "sheetCategory", "sheetRefundButton", "sheetDeleteButton", "sheetSaveButton", "merchantRanking",
     "budgetPressure", "macroPieChart", "macroCategoryBars", "macroCategoryTotal", "analysisTitle", "analysisRange", "incomeRecurring", "expenseRecurring",
     "recurringTimeline", "ruleForm", "ruleKeyword", "ruleCategory", "rulesList", "ruleCount",
     "categoryForm", "categoryName", "customCategoriesList"
@@ -187,6 +188,21 @@ function bindEvents() {
   });
   if (els.signUpButton) els.signUpButton.addEventListener("click", () => signUpWithEmail());
   if (els.signOutButton) els.signOutButton.addEventListener("click", () => signOutCloud());
+  if (els.sheetCloseButton) els.sheetCloseButton.addEventListener("click", () => closeTransactionSheet());
+  if (els.transactionSheet) {
+    els.transactionSheet.addEventListener("click", (event) => {
+      if (event.target === els.transactionSheet) closeTransactionSheet();
+    });
+  }
+  if (els.sheetSaveButton) els.sheetSaveButton.addEventListener("click", () => saveTransactionSheet());
+  if (els.sheetRefundButton) els.sheetRefundButton.addEventListener("click", () => {
+    if (sheetTransactionId) markTransactionAsRefund(sheetTransactionId);
+    closeTransactionSheet();
+  });
+  if (els.sheetDeleteButton) els.sheetDeleteButton.addEventListener("click", () => {
+    if (sheetTransactionId) deleteTransaction(sheetTransactionId);
+    closeTransactionSheet();
+  });
   if (els.privacyToggleButton) {
     els.privacyToggleButton.addEventListener("click", () => {
       privacyMode = !privacyMode;
@@ -2184,6 +2200,12 @@ function renderTransactions() {
   els.nextPageButton.disabled = transactionPage >= totalPages;
 
   els.transactionTable.innerHTML = pageRows.length ? pageRows.map(transactionRow).join("") : `<tr><td colspan="7">${emptyState()}</td></tr>`;
+  if (els.mobileTransactionList) {
+    els.mobileTransactionList.innerHTML = pageRows.length ? pageRows.map(mobileTransactionItem).join("") : emptyState();
+    els.mobileTransactionList.querySelectorAll("[data-mobile-transaction]").forEach((button) => {
+      button.addEventListener("click", () => openTransactionSheet(button.dataset.mobileTransaction));
+    });
+  }
   els.transactionTable.querySelectorAll("select[data-id]").forEach((select) => {
     select.addEventListener("change", () => updateTransactionCategory(select.dataset.id, select.value));
   });
@@ -2199,6 +2221,27 @@ function renderTransactions() {
   els.transactionTable.querySelectorAll("button[data-action='delete']").forEach((button) => {
     button.addEventListener("click", () => deleteTransaction(button.dataset.id));
   });
+}
+
+function mobileTransactionItem(item) {
+  const date = parseLocalDate(item.date);
+  const shortDate = new Intl.DateTimeFormat(language === "zh" ? "zh-CN" : "en-GB", { month: "2-digit", day: "2-digit" }).format(date);
+  const amountClass = item.amount >= 0 ? "amount-income" : "amount-expense";
+  return `
+    <button class="mobile-transaction-item" type="button" data-mobile-transaction="${item.id}" style="--bar-color:${categoryColor(item.category)}">
+      <span class="mobile-category-dot">${categoryInitial(item.category)}</span>
+      <span class="mobile-transaction-copy">
+        <strong>${escapeHtml(item.merchant || item.description || tr("unknown"))}</strong>
+        <small>${escapeHtml(shortDate)} · ${escapeHtml(categoryDisplayLabel(item.category))}</small>
+      </span>
+      <span class="mobile-transaction-amount ${amountClass}">${money(item.amount)}</span>
+    </button>
+  `;
+}
+
+function categoryInitial(category) {
+  const display = categoryDisplayLabel(category);
+  return String(display || "?").trim().slice(0, 1).toUpperCase();
 }
 
 function resetTransactionPageAndRender() {
@@ -2721,6 +2764,45 @@ function transactionRow(item) {
 
 function categorySelect(id, value) {
   return `<select data-id="${id}">${getCategories().map((category) => `<option value="${category}" ${category === value ? "selected" : ""}>${categoryDisplayLabel(category)}</option>`).join("")}</select>`;
+}
+
+function fillSheetCategory(value) {
+  if (!els.sheetCategory) return;
+  els.sheetCategory.innerHTML = getCategories().map((category) => `<option value="${category}" ${category === value ? "selected" : ""}>${categoryDisplayLabel(category)}</option>`).join("");
+}
+
+function openTransactionSheet(id) {
+  const transaction = state.transactions.find((item) => item.id === id);
+  if (!transaction || !els.transactionSheet) return;
+  sheetTransactionId = id;
+  els.sheetMerchant.textContent = transaction.merchant || transaction.description || tr("unknown");
+  els.sheetMeta.textContent = `${transaction.date} · ${categoryDisplayLabel(transaction.category)}`;
+  els.sheetOrb.textContent = categoryInitial(transaction.category);
+  els.sheetOrb.style.setProperty("--bar-color", categoryColor(transaction.category));
+  els.sheetDate.value = parseDate(transaction.date) || transaction.date;
+  els.sheetAmount.value = Number(transaction.amount || 0).toFixed(2);
+  els.sheetMerchantInput.value = transaction.merchant || "";
+  els.sheetDescription.value = transaction.description || "";
+  fillSheetCategory(transaction.category);
+  els.transactionSheet.classList.remove("hidden");
+  els.transactionSheet.setAttribute("aria-hidden", "false");
+}
+
+function closeTransactionSheet() {
+  sheetTransactionId = null;
+  if (!els.transactionSheet) return;
+  els.transactionSheet.classList.add("hidden");
+  els.transactionSheet.setAttribute("aria-hidden", "true");
+}
+
+function saveTransactionSheet() {
+  if (!sheetTransactionId) return;
+  updateTransactionField(sheetTransactionId, "date", els.sheetDate.value);
+  updateTransactionField(sheetTransactionId, "amount", els.sheetAmount.value);
+  updateTransactionField(sheetTransactionId, "merchant", els.sheetMerchantInput.value);
+  updateTransactionField(sheetTransactionId, "description", els.sheetDescription.value);
+  updateTransactionCategory(sheetTransactionId, els.sheetCategory.value);
+  closeTransactionSheet();
 }
 
 function updateTransactionCategory(id, category) {

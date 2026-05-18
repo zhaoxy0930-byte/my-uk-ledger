@@ -2546,3 +2546,142 @@ th:nth-child(7) {
     width: 100% !important;
   }
 }
+
+.mobile-transaction-list,
+.sheet-backdrop {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  .table-panel {
+    display: none !important;
+  }
+
+  .mobile-transaction-list {
+    display: grid;
+    gap: 10px;
+  }
+
+  .mobile-transaction-item {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+    min-height: 68px;
+    padding: 12px 14px;
+    border: 0.5px solid var(--line);
+    border-radius: 22px;
+    background: #ffffff;
+    color: inherit;
+    text-align: left;
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.04);
+  }
+
+  .mobile-category-dot,
+  .category-orb {
+    width: 42px;
+    height: 42px;
+    display: grid;
+    place-items: center;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--bar-color) 16%, white);
+    color: var(--bar-color);
+    font-weight: 800;
+  }
+
+  .mobile-transaction-copy {
+    min-width: 0;
+    display: grid;
+    gap: 3px;
+  }
+
+  .mobile-transaction-copy strong,
+  .mobile-transaction-copy small {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .mobile-transaction-copy strong {
+    font-size: 16px;
+    font-weight: 800;
+  }
+
+  .mobile-transaction-copy small {
+    color: var(--muted);
+    font-size: 12px;
+  }
+
+  .mobile-transaction-amount {
+    font-size: 16px;
+    white-space: nowrap;
+    font-family: ui-monospace, "SFMono-Regular", "SF Mono", Menlo, Consolas, monospace;
+  }
+
+  .sheet-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 120;
+    display: grid;
+    align-items: end;
+    background: rgba(15, 23, 42, 0.28);
+    backdrop-filter: blur(12px);
+  }
+
+  .sheet-backdrop.hidden {
+    display: none !important;
+  }
+
+  .transaction-sheet {
+    width: 100%;
+    max-height: calc(92dvh - env(safe-area-inset-top));
+    overflow: auto;
+    display: grid;
+    gap: 18px;
+    padding: 24px 18px calc(24px + env(safe-area-inset-bottom));
+    border-radius: 28px 28px 0 0;
+    background: #ffffff;
+    box-shadow: 0 -22px 60px rgba(15, 23, 42, 0.18);
+    position: relative;
+  }
+
+  .sheet-head {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr);
+    gap: 12px;
+    align-items: center;
+    padding-right: 42px;
+  }
+
+  .sheet-head h2 {
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .sheet-grid {
+    display: grid;
+    gap: 10px;
+  }
+
+  .sheet-grid label {
+    display: grid;
+    gap: 6px;
+    color: var(--muted);
+    font-size: 12px;
+  }
+
+  .sheet-grid input,
+  .sheet-grid select {
+    width: 100%;
+  }
+
+  .sheet-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1.2fr;
+    gap: 10px;
+  }
+}
