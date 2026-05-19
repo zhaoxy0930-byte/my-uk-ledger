@@ -4487,3 +4487,34 @@ th:nth-child(7) {
     z-index: 140 !important;
   }
 }
+
+/* Stop the mobile Filter control from covering pagination or transactions. */
+@media (max-width: 760px) {
+  #transactionsView .mobile-transactions-head {
+    display: flex !important;
+    justify-content: flex-end !important;
+    align-items: center !important;
+    margin: -4px 0 8px !important;
+    min-height: 36px !important;
+  }
+
+  #transactionsView .mobile-filter-button {
+    position: static !important;
+    right: auto !important;
+    bottom: auto !important;
+    z-index: 1 !important;
+    height: 34px !important;
+    min-height: 34px !important;
+    padding: 0 14px !important;
+    border-radius: 999px !important;
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08) !important;
+  }
+
+  #transactionsView .mobile-return-button.hidden {
+    display: none !important;
+  }
+
+  .mobile-transaction-list {
+    padding-bottom: 24px !important;
+  }
+}
