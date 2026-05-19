@@ -2823,7 +2823,7 @@ function drawPieChart(canvas, data) {
   ctx.fillStyle = "#ffffff";
   ctx.fill();
   ctx.fillStyle = "#18211f";
-  ctx.font = "700 18px Inter, sans-serif";
+  ctx.font = "400 18px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace";
   ctx.textAlign = "center";
   ctx.fillText(money(total), centerX, centerY + 6);
 }
