@@ -2432,14 +2432,15 @@ function renderAnalytics() {
   const fullRange = getPeriodRange(period, periodAnchor);
   const range = clampRangeToToday(fullRange);
   const previousRange = shiftRange(range, -1);
+  const analysisUnit = averageGrainForPeriod(period);
   const reportTransactions = reportingTransactions(state.transactions);
   const scoped = transactionsInRange(reportTransactions, range);
   const previous = transactionsInRange(reportTransactions, previousRange);
-  const grouped = fillPeriodPoints(scoped, analysisGrain, range);
+  const grouped = fillPeriodPoints(scoped, analysisUnit, range);
   drawChart(els.analysisChart, grouped, { mode: "cashflow" });
   const names = tr("analysisNames");
-  els.analysisTitle.textContent = names[analysisGrain];
-  els.analysisRange.textContent = `${formatRange(range)} · ${tr("pointCount")(grouped.length, displayPeriodName(analysisGrain))}`;
+  els.analysisTitle.textContent = names[period] || names[analysisUnit];
+  els.analysisRange.textContent = `${formatRange(range)} · ${tr("pointCount")(grouped.length, displayPeriodName(analysisUnit))}`;
 
   const income = sum(scoped.filter((item) => item.amount > 0), "amount");
   const expense = Math.abs(sum(scoped.filter((item) => item.amount < 0), "amount"));
@@ -2454,8 +2455,8 @@ function renderAnalytics() {
   els.analysisAverageMetric.textContent = money(average);
   els.analysisIncomeDelta.textContent = deltaText(income, previousIncome);
   els.analysisExpenseDelta.textContent = deltaText(expense, previousExpense);
-  els.analysisPeakLabel.textContent = peak?.label ? tr("peakSpend")(displayPeriodName(analysisGrain), peak.label) : tr("waiting");
-  els.analysisAverageLabel.textContent = `${formatRange(range)} · ${tr("averageBy")(displayPeriodName(analysisGrain))}`;
+  els.analysisPeakLabel.textContent = peak?.label ? tr("peakSpend")(displayPeriodName(analysisUnit), shortPeriodLabel(peak.label, analysisUnit)) : tr("waiting");
+  els.analysisAverageLabel.textContent = `${formatRange(range)} · ${tr("averageBy")(displayPeriodName(analysisUnit))}`;
 
   const expenses = scoped.filter((item) => item.amount < 0);
   const merchants = groupTotals(expenses, (item) => item.merchant, true).slice(0, 8);
