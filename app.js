@@ -527,12 +527,16 @@ const copy = {
       "Other": "Other"
     },
     categoryLabels: {
+      "其他收入": "Other Income",
+      "工资收入": "Salary Income",
+      "退款 / 报销": "Refunds / Reimbursements",
       "水电煤网": "Utilities",
       "房租 / Mortgage": "Rent / Mortgage",
       "购物 / 日用品": "Shopping / Daily essentials",
       "吃": "Food",
       "玩 / 出行": "Leisure / Travel",
-      "固定账单": "Fixed bills"
+      "固定账单": "Fixed bills",
+      "未分类": "Uncategorised"
     }
   },
   zh: {
