@@ -1,0 +1,21 @@
+{
+  "name": "Ledger UK",
+  "short_name": "Ledger UK",
+  "description": "A private UK bank statement and spending analysis app.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f9fafb",
+  "theme_color": "#f9fafb",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icons/ledger-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["finance", "productivity"],
+  "lang": "en-GB"
+}

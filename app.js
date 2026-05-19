@@ -102,6 +102,7 @@ document.addEventListener("DOMContentLoaded", () => {
   bindEvents();
   render();
   initCloudSync();
+  registerPwaServiceWorker();
 });
 
 window.addEventListener("resize", debounce(() => render(), 160));
@@ -129,6 +130,14 @@ function cacheElements() {
     "categoryForm", "categoryName", "customCategoriesList"
   ].forEach((id) => {
     els[id] = document.getElementById(id);
+  });
+}
+
+function registerPwaServiceWorker() {
+  if (!("serviceWorker" in navigator)) return;
+  if (!["https:", "http:"].includes(window.location.protocol)) return;
+  navigator.serviceWorker.register("/service-worker.js").catch((error) => {
+    console.warn("PWA service worker registration failed", error);
   });
 }
 
