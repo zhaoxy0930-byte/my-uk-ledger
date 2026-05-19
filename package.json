@@ -1,0 +1,25 @@
+{
+  "name": "ledger-uk",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Ledger UK personal finance app",
+  "type": "module",
+  "scripts": {
+    "serve": "node server.mjs",
+    "app:prepare": "node scripts/prepare-capacitor.mjs",
+    "cap:init": "cap init \"Ledger UK\" \"com.ledgeruk.app\" --web-dir .",
+    "cap:add:ios": "cap add ios",
+    "cap:add:android": "cap add android",
+    "cap:sync": "npm run app:prepare && cap sync",
+    "cap:open:ios": "cap open ios",
+    "cap:open:android": "cap open android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^7.4.4",
+    "@capacitor/core": "^7.4.4",
+    "@capacitor/ios": "^7.4.4"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.4.4"
+  }
+}
