@@ -710,8 +710,44 @@ const copy = {
     chartEmpty: "导入账单后显示趋势",
     noData: "暂无数据",
     unknown: "未知",
-    macroLabels: {},
-    categoryLabels: {}
+    macroLabels: {
+      "Food": "吃",
+      "Shopping / Essentials": "购物 / 日用品",
+      "Groceries": "超市 / 食品",
+      "Leisure / Travel": "玩 / 出行",
+      "Fixed bills": "固定账单",
+      "Transfers / Investments": "转账 / 投资",
+      "Income / Refunds": "收入 / 退款",
+      "Other": "其他"
+    },
+    categoryLabels: {
+      "Salary Income": "工资收入",
+      "Other Income": "其他收入",
+      "Refunds / Reimbursements": "退款 / 报销",
+      "Rent / Mortgage": "房租 / Mortgage",
+      "Council Tax": "Council Tax",
+      "Utilities": "水电煤网",
+      "Groceries": "超市 / 食品",
+      "Eating Out": "堂食 / 餐饮",
+      "Takeaway / Delivery": "外卖",
+      "Sports": "运动",
+      "Entertainment": "娱乐",
+      "Transport": "交通",
+      "Subscriptions": "订阅",
+      "Shopping": "购物",
+      "Healthcare": "医疗健康",
+      "Savings / Investment": "储蓄 / 投资",
+      "Transfer": "转账",
+      "Travel": "旅行",
+      "Cash": "现金",
+      "Uncategorised": "未分类",
+      "Shopping / Essentials": "购物 / 日用品",
+      "Leisure / Travel": "玩 / 出行",
+      "Fixed bills": "固定账单",
+      "Transfers / Investments": "转账 / 投资",
+      "Income / Refunds": "收入 / 退款",
+      "Other": "其他"
+    }
   }
 };
 
